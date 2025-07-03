@@ -8,6 +8,7 @@ import com.example.demo.dao.EventDAO;
 import com.example.demo.dao.EventEnrollementDAO;
 import com.example.demo.dao.FormateurDAO;
 import com.example.demo.entity.*;
+import com.example.demo.entity.Enums.Availability;
 import com.example.demo.entity.Enums.Role;
 import com.example.demo.mapper.EventMapper;
 import com.example.demo.validator.ObjectValidator;
@@ -158,11 +159,14 @@ public class EventService {
 
 
                 formateur=formateurDAO.findById(i) ;
-
-                if(formateur.isPresent()){
-                    formateurs.add( formateur.get()  ) ;
+                if (formateur.isPresent()&&formateur.get().getAvailability().equals(Availability.AVAILABLE)) {
+                    formateurs.add(formateur.get());
                 }
+                else {
 
+                    System.out.println("u cant assign formateur "+formateur.get().getFirstName() +" because he is not availabale!");
+
+                }
 
 
 
@@ -207,8 +211,13 @@ public class EventService {
 
 
                 formateur = formateurDAO.findById(i);
-                if (formateur.isPresent()) {
+                if (formateur.isPresent()&&formateur.get().getAvailability().equals(Availability.AVAILABLE)) {
                     formateurs.add(formateur.get());
+                }
+                else {
+
+                    System.out.println("u cant assign formateur "+formateur.get().getFirstName() +" because he is not availabale!");
+
                 }
 
 
