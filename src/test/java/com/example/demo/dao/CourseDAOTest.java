@@ -2,6 +2,7 @@ package com.example.demo.dao;
 
 
 import com.example.demo.entity.*;
+import com.example.demo.entity.Enums.Availability;
 import com.example.demo.entity.Enums.PaymentStatus;
 import com.example.demo.entity.Enums.Role;
 import org.junit.jupiter.api.Test;
@@ -115,47 +116,7 @@ class CourseDAOTest {
 
 
 
-  /*  @Test
-    void testIsEnrollmentPaid_ReturnsTrue_WhenPaidEnrollmentExists() {
-        // given
-        Student student = createAndPersistStudent();
-        entityManager.persist(student);
 
-        Formation formation = createAndPersistFormation();
-        entityManager.persist(formation);
-
-        Enrollement enrollement = createAndPersistEnrollement(student,formation,"paid");
-
-        entityManager.persist(enrollement);
-
-        entityManager.flush();
-
-        // when
-        boolean isPaid = courseDAO.isEnrollmentPaid(student.getId(), formation.getId());
-
-        // then
-        assertThat(isPaid).isTrue();
-    }
-*/
- /*   @Test
-    void testIsEnrollmentPaid_ReturnsFalse_WhenNoPaidEnrollmentExists() {
-        // given
-        Student student = createAndPersistStudent();
-        entityManager.persist(student);
-
-        Formation formation = createAndPersistFormation();
-        entityManager.persist(formation);
-
-        Enrollement enrollement = createAndPersistEnrollement(student,formation,"unpaid");
-
-        // when
-        boolean isPaid = courseDAO.isEnrollmentPaid(student.getId(), formation.getId());
-
-        // then
-        assertThat(isPaid).isFalse();
-    }
-
-*/
     // Helper methods
     private Formation createAndPersistFormation(Formateur formateur) {
         Formation formation = Formation.builder()
@@ -167,7 +128,7 @@ class CourseDAOTest {
     }
     private Formateur createAndPersistFormateur() throws ParseException {
         String dateString = "05/12/2002";
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(dateString);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
 
         Formateur formateur = Formateur.builder()
@@ -179,6 +140,7 @@ class CourseDAOTest {
                 .username("jugking")
                 .dateNaissance(LocalDate.parse(dateString,formatter))
                 .experienceYears(2)
+                .availability(Availability.AVAILABLE)
                 .build();
         return entityManager.persist(formateur);
     }
@@ -196,6 +158,7 @@ class CourseDAOTest {
                 .firstName("hoho").lastName("5akj").role(Role.STUDENT)
                 .email("sqfodhf@sdfl.com").username("qsmf123").phoneNumber("25623360")
                 .password("123456789")
+                .age(11)
                 .build();
         return entityManager.persist(student);
     }

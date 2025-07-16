@@ -36,7 +36,7 @@ public class EnrollementDaoTest {
     void setUp() throws ParseException {
         // Create and save a student
         String dateString = "05/12/2002";
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(dateString);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
 
         student = Student.builder()
@@ -78,13 +78,16 @@ public class EnrollementDaoTest {
 
         //assert
         assertTrue(result);
-        
+
     }
 
     @Test
     void testIsEnrollmentPaid() {
+
         boolean result = enrollementDAO.isEnrollmentPaid(student.getId(), formation.getId());
         assertTrue(result);
+
+
     }
 
     @Test

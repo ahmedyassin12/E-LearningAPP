@@ -74,7 +74,7 @@ class StudentServiceTest {
                 .lastName("oo")
                 .role(Role.STUDENT)
                 .phoneNumber("55550")
-                        .build();
+                .build();
 
         createStudentDto =CreateStudentDto.builder()
                 .id(1L)

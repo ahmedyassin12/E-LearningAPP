@@ -36,7 +36,7 @@ class EventEnrollementDAOTest {
     void setUp() throws ParseException {
         // Create and save a student
         String dateString = "05/12/2002";
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(dateString);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
 
         student = Student.builder()

@@ -1,6 +1,7 @@
 package com.example.demo.dao;
 
 import com.example.demo.entity.*;
+import com.example.demo.entity.Enums.Availability;
 import com.example.demo.entity.Enums.Role;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,7 +32,7 @@ class EventDAOTest {
     @BeforeEach
     void setup() throws ParseException {
         String dateString = "05/12/2002";
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(dateString);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
 
         student = Student.builder()
@@ -47,7 +48,7 @@ class EventDAOTest {
                 .build();
         entityManager.persist(student);
 
-         formateur = Formateur.builder()
+        formateur = Formateur.builder()
                 .firstName("formateur")
                 .lastName("zozo")
                 .email("trao@os.com")
@@ -56,8 +57,9 @@ class EventDAOTest {
                 .username("jugking")
                 .dateNaissance(LocalDate.parse(dateString,formatter))
                 .experienceYears(2)
+                .availability(Availability.AVAILABLE)
                 .build();
-         entityManager.persist(formateur);
+        entityManager.persist(formateur);
 
 
         event = Event.builder()

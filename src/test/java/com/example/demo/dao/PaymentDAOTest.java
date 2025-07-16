@@ -44,7 +44,6 @@ class PaymentDAOTest {
                 .phoneNumber("2112058")
                 .username("ss")
                 .dateNaissance(LocalDate.now())
-                .Student_Grade("A")
                 .age(15)
                 .build();
         em.persist(student);
@@ -58,11 +57,11 @@ class PaymentDAOTest {
                 .build();
         em.persist(testFormation);
 
-         enrollement = new Enrollement();
+        enrollement = new Enrollement();
         enrollement.setFormation(testFormation);
         enrollement.setStudent(student);
         enrollement.setPayment_Status(PaymentStatus.Paid);
-
+        enrollement.setEnrollement_date(LocalDate.now());
         em.persist(enrollement);
 
     }
@@ -77,7 +76,7 @@ class PaymentDAOTest {
         // Arrange
         Payment payment = createTestPayment();
         em.persist(payment);
-      //  em.flush();
+        //  em.flush();
 
         // Act
         List<Payment> result = paymentDAO.findByStudentId(student.getId());
@@ -106,7 +105,7 @@ class PaymentDAOTest {
     @Test
     void getPaiementsOfEnrollement_ShouldReturnAllPayments() {
         // Arrange
-       Payment  payment1= em.persist(createTestPayment());
+        Payment  payment1= em.persist(createTestPayment());
         Payment payment2=em.persist(createTestPayment());
         payment2.setPaymentDate(LocalDate.now().minusDays(5));
 
@@ -121,8 +120,8 @@ class PaymentDAOTest {
 
         List<Payment>payments=(List<Payment>) result ;
 
-            Assertions.assertThat(payments.get(0).getPaymentDate()).isEqualTo(payment1.getPaymentDate());
-            Assertions.assertThat(payments.get(0).getAmount()).isEqualTo(payment1.getAmount());
+        Assertions.assertThat(payments.get(0).getPaymentDate()).isEqualTo(payment1.getPaymentDate());
+        Assertions.assertThat(payments.get(0).getAmount()).isEqualTo(payment1.getAmount());
 
 
         Assertions.assertThat(payments.get(1).getPaymentDate()).isEqualTo(payment2.getPaymentDate());

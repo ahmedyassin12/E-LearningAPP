@@ -26,7 +26,7 @@ public interface CourseDAO extends CrudRepository<Course,Long> {
             "JOIN Enrollement e ON e.formation.id = f.id " +
             "WHERE e.student.id = :studentId " +
             "AND e.formation.id = :formationId " +
-            "AND e.payment_Status = 'paid'")
+            "AND e.payment_Status = 'Paid'")
     public Iterable<Course> findCoursesByStudentAndFormation(@Param("studentId") Long studentId, @Param("formationId") Long formationId);
 
 

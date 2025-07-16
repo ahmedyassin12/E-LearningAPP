@@ -8,6 +8,7 @@ import com.example.demo.dao.EventDAO;
 import com.example.demo.dao.EventEnrollementDAO;
 import com.example.demo.dao.FormateurDAO;
 import com.example.demo.entity.*;
+import com.example.demo.entity.Enums.Availability;
 import com.example.demo.entity.Enums.Role;
 import com.example.demo.mapper.EventMapper;
 import com.example.demo.validator.ObjectValidator;
@@ -87,7 +88,8 @@ class EventServiceTest {
         createDto.setFormateur_ids(List.of(1L));
         createDto.setEventDto(new EventDto());
 
-        Formateur formateur = Formateur.builder().id(1L).build();
+        Formateur formateur = Formateur.builder().id(1L).availability(Availability.AVAILABLE).build();
+
         when(formateurDAO.findById(1L)).thenReturn(Optional.of(formateur));
 
         EventManagerDto result = eventService.createNewEvent(createDto);
@@ -105,7 +107,7 @@ class EventServiceTest {
         createDto.setFormateur_ids(List.of(1L));
 
         Event existing = Event.builder().event_id(1L).build();
-        Formateur formateur = Formateur.builder().id(1L).build();
+        Formateur formateur = Formateur.builder().id(1L).availability(Availability.AVAILABLE).build();
 
         when(eventDAO.findById(1L)).thenReturn(Optional.of(existing));
         when(formateurDAO.findById(1L)).thenReturn(Optional.of(formateur));

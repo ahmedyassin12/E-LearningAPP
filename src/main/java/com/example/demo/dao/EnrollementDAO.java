@@ -18,7 +18,7 @@ public interface EnrollementDAO extends CrudRepository<Enrollement,Long> {
     SELECT COUNT(e) > 0 FROM Enrollement e 
     WHERE e.student.id = :studentId 
       AND e.formation.id = :formationId 
-      AND e.payment_Status = 'paid'
+      AND e.payment_Status = 'Paid'
 """)
     boolean isEnrollmentPaid(@Param("studentId") Long studentId, @Param("formationId") Long formationId);
 

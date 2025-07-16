@@ -15,8 +15,7 @@ import lombok.experimental.SuperBuilder;
 public class StudentRequest extends RegisterRequest {
 
 
-    @NotEmpty
-    private String Student_Grade ;
+
     @Min(10)
     private int age ;
 

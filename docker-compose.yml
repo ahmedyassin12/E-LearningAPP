@@ -1,0 +1,50 @@
+  version: '3.8'
+
+  services:
+    postgres:
+      container_name: postgres-sqll
+      image: postgres
+      environment:
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: password
+        POSTGRES_DB: eLearningDB
+        TYPE: postgresql
+      ports:
+        - "5432:5432"  # Mapping host 5432 to container's 5432
+      volumes:
+        - postgres_data:/var/lib/postgresql/data
+      networks:
+        - e-learning_spring_boot_net
+
+    spring-boot-app:
+      container_name: e-learningApp
+      image: e-learning/app  # custome java image
+      ports:
+        - "8088:8080"  # Mapping host port 8088 to container port 8080
+      volumes:
+        - /mnt/c/ehCache/src:/ehCache/src
+
+      environment:
+        SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/eLearningDB
+        SPRING_DATASOURCE_USERNAME: postgres
+        SPRING_DATASOURCE_PASSWORD: password
+        SERVER_PORT: 8080
+        spring.mail.username: ahmedyassinzouaoui@gmail.com
+        spring.mail.password: xhvs zcqd rtmz ogwz
+      networks:
+        - e-learning_spring_boot_net
+      healthcheck:
+        test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+        interval: 5s
+        timeout: 5s
+        retries: 5
+      depends_on:
+        - postgres # Ensures postgres is started before spring-boot-app
+
+  volumes:
+    postgres_data:  # Define the volume where PostgreSQL data will be stored
+
+  networks:
+    e-learning_spring_boot_net:
+      driver: bridge  # Default network driver
+

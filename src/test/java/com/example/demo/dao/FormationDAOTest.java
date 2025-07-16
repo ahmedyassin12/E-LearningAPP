@@ -2,6 +2,7 @@ package com.example.demo.dao;
 
 
 import com.example.demo.entity.*;
+import com.example.demo.entity.Enums.Availability;
 import com.example.demo.entity.Enums.PaymentStatus;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
@@ -51,8 +52,10 @@ public class FormationDAOTest {
                 .password("smdlfjkqs")
                 .phoneNumber("21122458")
                 .username("tachtoucha")
+                .experienceYears(15)
+                .availability(Availability.AVAILABLE)
                 .dateNaissance(LocalDate.now())
-                        .build() ;
+                .build() ;
 
         em.persist(formateur);
         student = Student.builder()
@@ -63,9 +66,9 @@ public class FormationDAOTest {
                 .phoneNumber("2112058")
                 .username("ss")
                 .dateNaissance(LocalDate.now())
-                .Student_Grade("A")
+                .age(12)
                 .build();
-em.persist(student);
+        em.persist(student);
 
         testFormation = Formation.builder()
 
@@ -74,13 +77,13 @@ em.persist(student);
                 .date(LocalDate.now())
                 .formateurs(Set.of(formateur))
                 .build();
-em.persist(testFormation);
+        em.persist(testFormation);
 
         Enrollement enrollement = new Enrollement();
         enrollement.setFormation(testFormation);
         enrollement.setStudent(student);
         enrollement.setPayment_Status(PaymentStatus.Paid);
-
+        enrollement.setEnrollement_date(LocalDate.now());
         em.persist(enrollement);
 
         em.flush();

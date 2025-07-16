@@ -1,6 +1,8 @@
 /*package com.example.demo.entity;
 
 import com.example.demo.auth.Service.AuthenticationService;
+import com.example.demo.dao.PaymentDAO;
+import com.example.demo.entity.Enums.Role;
 import com.example.demo.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -10,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 
@@ -29,7 +32,7 @@ public class DataInitializer implements CommandLineRunner {
 
 
     @Autowired
-    private PaiementService paiementRepository;
+    private PaymentDAO paiementRepository;
 
     @Autowired
     private EventService eventRepository;
@@ -38,7 +41,7 @@ public class DataInitializer implements CommandLineRunner {
     private PasswordEncoder passwordEncoder;
 
     @Autowired
-    private PaiementService paiementService ;
+    private PaymentService paiementService ;
     @Autowired
     EventEnrollementService eventEnrollementService;
 
@@ -55,8 +58,8 @@ public class DataInitializer implements CommandLineRunner {
 
     public void initStudents(int numberOfStudents) throws ParseException {
         String dateString = "05/12/2002";
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
-        Date date = dateFormat.parse(dateString);
+        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        LocalDate date = LocalDate.parse(dateString,dateFormat);
         Random random = new Random();
 
         var formateur = new Formateur().builder()

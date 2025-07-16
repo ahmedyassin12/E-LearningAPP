@@ -179,7 +179,7 @@ class EventEnrollementServiceTest {
     void removeEnrollement_ValidId_ReturnsSuccess() {
         Long id = 1L;
         EventEnrollement eventEnrollement = new EventEnrollement();
-eventEnrollement.setId(id);
+        eventEnrollement.setId(id);
         when(enrollementDAO.findById(id)).thenReturn(Optional.of(eventEnrollement));
 
         String result = service.removeEnrollement(id);

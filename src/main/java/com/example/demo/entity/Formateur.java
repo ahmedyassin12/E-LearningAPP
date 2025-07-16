@@ -34,6 +34,7 @@ public class Formateur extends User {
     )    private Set<Skill> skills = new HashSet<>();
 
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Availability availability;
 

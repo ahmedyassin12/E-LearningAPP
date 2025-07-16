@@ -27,6 +27,7 @@
         @Column(name = "enrollement_id")
         private Long enrollement_id ;
 
+        @Enumerated(EnumType.STRING)
         @Column(name="payment_Status")
         private PaymentStatus payment_Status;
 

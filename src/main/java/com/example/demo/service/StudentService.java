@@ -201,7 +201,6 @@ public class StudentService {
                  .phoneNumber("2112058")
                  .username("ss")
                  .dateNaissance(date)
-                .Student_Grade("A")
                 .build();
 
 

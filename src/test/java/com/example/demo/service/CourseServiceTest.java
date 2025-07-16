@@ -88,12 +88,12 @@ class CourseServiceTest {
         unpaidCourseDto = UnpaidCourseDto.builder()
                 .initiateCourseDto(CreateInitiateCourse(testCourse))
                 .build();
-         initDto = InitiateCourseDto.builder()
+        initDto = InitiateCourseDto.builder()
                 .course_id(1L)
                 .courseName("Spring Boot")
                 .course_description("Advanced Spring topics")
                 .build();
-         createDto= CreateCourseDto.builder()
+        createDto= CreateCourseDto.builder()
                 .initiateCourseDto(initDto)
                 .formation_id(10L)
                 .publicId("abc123")

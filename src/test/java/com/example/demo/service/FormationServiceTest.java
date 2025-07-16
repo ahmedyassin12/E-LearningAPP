@@ -155,11 +155,11 @@ class FormationServiceTest {
     @Test
     void getAllFormation_StudentRole_ReturnsDTOs() {
 
-       FormationStudentDto testFormationDto = FormationStudentDto.builder()
-               .formation_name("Java Fundamentals")
-               .formation_id(testFormation.getId())
-               .isStudentEnrolled(true)
-               .IsEnrollementpaid(true)
+        FormationStudentDto testFormationDto = FormationStudentDto.builder()
+                .formation_name("Java Fundamentals")
+                .formation_id(testFormation.getId())
+                .isStudentEnrolled(true)
+                .IsEnrollementpaid(true)
                 .date(LocalDate.now())
                 .build();
 
@@ -303,7 +303,7 @@ class FormationServiceTest {
 
 
 
-       Formateur formateur=Formateur.builder()
+        Formateur formateur=Formateur.builder()
                 .id(1L)
                 .username("john_doe")
                 .email("john@example.com")
@@ -312,6 +312,7 @@ class FormationServiceTest {
                 .role(Role.STUDENT)
                 .password("password")
                 .phoneNumber("55550")
+                .availability(Availability.AVAILABLE)
                 .build();
 
         CreateFormationDto createFormationDto = CreateFormationDto.builder()
