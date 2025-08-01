@@ -21,7 +21,7 @@ public class Skill {
     private String name;
 
 
-    @ManyToMany(mappedBy = "skills")
+    @ManyToMany(mappedBy = "skills", fetch = FetchType.LAZY)
     private Set<Formateur> formateurs;
 
 

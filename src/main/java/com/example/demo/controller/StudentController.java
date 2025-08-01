@@ -33,7 +33,7 @@ public class StudentController {
 
     }*/
   @GetMapping("/getStudentOfFormation/{formation_id}")
-  public ResponseEntity<List<StudentDto>>getFormateurCourses ( @PathVariable Long formation_id){
+  public ResponseEntity<List<StudentDto>>getStudentOfFormation ( @PathVariable Long formation_id){
 
       return  new ResponseEntity<>(studentService.getStudentOfFormation(formation_id) ,HttpStatus.OK) ;
 

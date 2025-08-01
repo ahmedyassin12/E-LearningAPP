@@ -7,6 +7,7 @@ import com.example.demo.Dtos.userDto.StudentDto;
 import com.example.demo.auth.Service.AuthenticationService;
 import com.example.demo.auth.Dto.StudentRequest;
 import com.example.demo.dao.StudentDAO;
+import com.example.demo.entity.Enums.Role;
 import com.example.demo.entity.Formateur;
 import com.example.demo.entity.Student;
 import com.example.demo.mapper.UsersMapper;
@@ -159,6 +160,7 @@ public class StudentService {
 
     public StudentDto createNewStudent(CreateStudentDto createStudentDto ){
 
+        createStudentDto.setRole(Role.STUDENT);
         studentValidator.validate(createStudentDto);
         createStudentDto.setPassword(passwordEncoder.encode(createStudentDto.getPassword()));
 

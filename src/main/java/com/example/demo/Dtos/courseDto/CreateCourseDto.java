@@ -20,6 +20,5 @@ public class CreateCourseDto {
     @NotNull
     private Long formation_id ;
 
-    private String publicId ;
 
 }

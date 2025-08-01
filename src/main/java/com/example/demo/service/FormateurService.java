@@ -5,6 +5,7 @@ import com.example.demo.dao.FieldDao;
 import com.example.demo.dao.FormateurDAO;
 import com.example.demo.dao.SkillDao;
 import com.example.demo.entity.Enums.Availability;
+import com.example.demo.entity.Enums.Role;
 import com.example.demo.entity.Field;
 import com.example.demo.entity.Formateur;
 import com.example.demo.entity.Skill;
@@ -144,6 +145,7 @@ formateurMapper.returnFormateurDto(optional.get());
 
         public FormateurDto createNewFormateur(CreateFormateurDto createFormateurDto ){
 
+        createFormateurDto.setRole(Role.FORMATEUR);
             CreateValidator.validate(createFormateurDto);
 
             createFormateurDto.setPassword(passwordEncoder.encode(createFormateurDto.getPassword()));
@@ -225,6 +227,7 @@ formateurMapper.returnFormateurDto(optional.get());
             Formateur formateur = formateurDAO.findById(formateurDto.getId()).orElseThrow
                     (()->new EntityNotFoundException("formateur NOt found ")) ;
 
+            formateurDto.setRole(Role.FORMATEUR);
             updateValidator.validate(formateurDto);
             Set<Skill> skills = new HashSet<>();
 
@@ -246,7 +249,7 @@ formateurMapper.returnFormateurDto(optional.get());
 
 
 
-            //update only these ( others I already assign for each its endPoint cuz they are sensible) :
+            //update only these ( others I already assign for each its own endPoint cuz they are sensible exp : password) :
             formateur.setExperienceYears(formateurDto.getExperience_time());
             formateur.setDateNaissance(formateurDto.getDateNaissance());
             formateur.setEmail(formateurDto.getEmail());

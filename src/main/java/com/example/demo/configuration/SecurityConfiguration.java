@@ -131,7 +131,7 @@ public class SecurityConfiguration {
                  .requestMatchers(GET,"/getAllFormateurs").hasRole(MANAGER.name())
                  .requestMatchers(GET,"/getFormateurByNom/{nom}").hasRole(MANAGER.name())
                  .requestMatchers(GET,"/getFormateurByUsername/{username}").hasRole(MANAGER.name())
-                 .requestMatchers(GET,"/getFormateurByid/{id}").hasAnyRole(MANAGER.name(),FORMATEUR.name())
+                 .requestMatchers(GET,"/getFormateurByid/{id}").hasAnyRole(MANAGER.name())
                  .requestMatchers(GET,"/getFormateurByEmail/{Email}").hasRole(MANAGER.name())
                  .requestMatchers(GET,"/formateurGetMyProfile").hasRole(FORMATEUR.name())
                  .requestMatchers(GET,"/UpdateAvailability").hasRole(FORMATEUR.name())

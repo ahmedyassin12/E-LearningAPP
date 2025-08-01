@@ -20,7 +20,7 @@ public class AuthenticationController {
 
 
     @PostMapping("/registerManager")
-    public ResponseEntity<String> register (@RequestBody RegisterRequest request ){
+    public ResponseEntity<String> registerManager(@RequestBody RegisterRequest request ){
 
        //
 
@@ -29,7 +29,7 @@ return ResponseEntity.ok(service.registerManager(request)) ;
 
     }
     @PostMapping("/registerStudent")
-    public ResponseEntity<String> register (@RequestBody StudentRequest request ){
+    public ResponseEntity<String> registerStudent(@RequestBody StudentRequest request ){
 
         //
 
@@ -38,7 +38,7 @@ return ResponseEntity.ok(service.registerManager(request)) ;
 
     }
     @PostMapping("/registerFormateur")
-    public ResponseEntity<String> register (@RequestBody FormateurRequest request ){
+    public ResponseEntity<String> registerFormateur(@RequestBody FormateurRequest request ){
 
         //
 

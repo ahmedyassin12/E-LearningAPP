@@ -13,13 +13,14 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class Field {
+
+
     @Id
     @GeneratedValue
     private Long id;
 
     @Column(unique = true,nullable = false)
     private String fieldName;
-
 
     private String description;
 
