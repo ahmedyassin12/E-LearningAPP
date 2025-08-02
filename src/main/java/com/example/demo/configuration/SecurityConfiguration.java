@@ -47,7 +47,7 @@ public class SecurityConfiguration {
             "/configuration/security",
             "/swagger-ui/**",
             "/webjars/**",
-            "/swagger-ui.html","/api/v1/**","/api/v1/auth/verify?token/**," +
+            "/swagger-ui.html","/api/v1/**","/api/v1/auth/verify?token/**,",
             "https://e-learningapp-5dxn.onrender.com"};
 
     @Bean
