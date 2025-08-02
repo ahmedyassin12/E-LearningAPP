@@ -26,7 +26,7 @@ import io.swagger.v3.oas.annotations.servers.Server;
                 @Server(
 
                         description = "Local ENV",
-                        url="http://localhost:8088"
+                        url="https://e-learningapp-5dxn.onrender.com"
                 )
 
 
