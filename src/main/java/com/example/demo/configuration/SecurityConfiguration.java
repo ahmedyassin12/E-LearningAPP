@@ -48,7 +48,7 @@ public class SecurityConfiguration {
             "/swagger-ui/**",
             "/webjars/**",
             "/swagger-ui.html","/api/v1/**","/api/v1/auth/verify?token/**,",
-            "https://e-learningapp-5dxn.onrender.com"};
+            "https://e-learningapp-5dxn.onrender.com/**"};
 
     @Bean
     public SecurityFilterChain securityFilterChain (HttpSecurity http ) throws Exception {
