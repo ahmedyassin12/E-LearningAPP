@@ -38,7 +38,6 @@ public CourseDto returnCourseDto(Course course){
 
         return ManagerCourseDto.builder()
                 .initiateCourseDto(CreateInitiateCourse(course))
-                .publicId(course.getPublicId())
                 .coursePdf_url(course.getCoursePdf_url())
                 .coursevideo_url(course.getCoursevideo_url())
                 .build();
@@ -56,7 +55,6 @@ public CourseDto returnCourseDto(Course course){
 
         return Course.builder()
                 .courseName(createCourseDto.getInitiateCourseDto().getCourseName())
-                .publicId(createCourseDto.getPublicId())
                 .course_description(createCourseDto.getInitiateCourseDto().getCourse_description())
                 .formation(formation)
                 .course_id(createCourseDto.getInitiateCourseDto().getCourse_id())

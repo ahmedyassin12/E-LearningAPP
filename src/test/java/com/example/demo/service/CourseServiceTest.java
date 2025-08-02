@@ -96,7 +96,6 @@ class CourseServiceTest {
         createDto= CreateCourseDto.builder()
                 .initiateCourseDto(initDto)
                 .formation_id(10L)
-                .publicId("abc123")
                 .build();
 
 
@@ -351,8 +350,7 @@ class CourseServiceTest {
 
         when(courseDAO.findById(anyLong())).thenReturn(Optional.of(testCourse));
         when(formationDAO.findById(anyLong())).thenReturn(Optional.of(testFormation));
-        when(courseMapper.returnCourse(createDto,testFormation))
-                .thenReturn(testCourse);
+
         when(courseDAO.save(testCourse)).thenReturn(testCourse);
         when(courseMapper.returnCourseDto(testCourse)).thenReturn(courseDto);
 
@@ -389,7 +387,6 @@ class CourseServiceTest {
     void getPublicIdFromCourseData_ValidId_ReturnsPublicId() {
         testCourse.setPublicId("public123");
         when(courseDAO.findById(1L)).thenReturn(Optional.of(testCourse));
-        when(courseMapper.returnManagerCourseDto(testCourse)).thenReturn(managerCourseDto);
 
         String result = courseService.getPublicIdFromCourseData(1L);
 
@@ -398,9 +395,8 @@ class CourseServiceTest {
 
     @Test
     void getPublicIdFromCourseData_NullPublicId_ThrowsException() {
-        managerCourseDto.setPublicId(null);
+        testCourse.setPublicId(null);
         when(courseDAO.findById(1L)).thenReturn(Optional.of(testCourse));
-        when(courseMapper.returnManagerCourseDto(testCourse)).thenReturn(managerCourseDto);
 
 
         assertThrows(NullPointerException.class,

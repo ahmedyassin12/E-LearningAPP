@@ -315,10 +315,13 @@ courseValidator.validate(updateCourseDto);
             Formation formation =formationDAO.findById(updateCourseDto.getFormation_id() )
                     .orElseThrow(() -> new RuntimeException("Invalid formation id " ));
 
-             Course updatecourse=courseMapper.returnCourse(updateCourseDto,formation);
-            courseDAO.save(updatecourse);
+            course.get().setCourse_description(updateCourseDto.getInitiateCourseDto().getCourse_description());
+            course.get().setCourseName(updateCourseDto.getInitiateCourseDto().getCourseName());
+            course.get().setFormation(formation);
 
-            return courseMapper.returnCourseDto(updatecourse);
+            courseDAO.save(course.get());
+
+            return courseMapper.returnCourseDto(course.get());
 
         }
 
@@ -354,7 +357,7 @@ courseValidator.validate(updateCourseDto);
 
         public String  getPublicIdFromCourseData(Long course_id){
 
-            String public_id= this.getCourseById(course_id) .getPublicId() ;
+            String public_id= courseDAO.findById(course_id).get().getPublicId()  ;
 
             if (public_id!=null) return public_id ;
 

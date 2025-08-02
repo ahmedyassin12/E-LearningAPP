@@ -101,7 +101,6 @@ class EnrollementDtoValidatorTest {
         CreateCourseDto dto = CreateCourseDto.builder()
                 .initiateCourseDto(initDto)
                 .formation_id(100L)
-                .publicId("public-id")
                 .build();
 
         assertDoesNotThrow(
@@ -117,7 +116,6 @@ class EnrollementDtoValidatorTest {
         CreateCourseDto dto = CreateCourseDto.builder()
                 .initiateCourseDto(initDto)
                 .formation_id(100L)
-                .publicId("public-id")
                 .build();
 
         assertThrows(ObjectNotValidException.class,
@@ -134,7 +132,6 @@ class EnrollementDtoValidatorTest {
         CreateCourseDto dto = CreateCourseDto.builder()
                 .initiateCourseDto(initDto)
                 .formation_id(100L)
-                .publicId("public-id")
                 .build();
 
         assertThrows(ObjectNotValidException.class,
@@ -151,7 +148,6 @@ class EnrollementDtoValidatorTest {
 
         CreateCourseDto dto = CreateCourseDto.builder()
                 .initiateCourseDto(initDto)
-                .publicId("public-id")
                 .build();
 
         assertThrows(ObjectNotValidException.class,
