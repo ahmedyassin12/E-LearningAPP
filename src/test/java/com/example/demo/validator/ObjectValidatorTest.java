@@ -44,7 +44,7 @@ class EnrollementDtoValidatorTest {
 
 
     @Test
-    void validate_ValidDto_ShouldPass() {
+    void validate_ValidDto_ShouldPass()  {
         EnrollementDto dto = EnrollementDto.builder()
                 .enrollementId(1L)
                 .paymentStatus(PaymentStatus.Paid)

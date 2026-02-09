@@ -82,7 +82,8 @@ class CourseServiceTest {
 
         managerCourseDto = ManagerCourseDto.builder()
                 .initiateCourseDto(CreateInitiateCourse(testCourse))
-                .publicId("public123")
+                .pdfPublicId("public123")
+                .vidPublicId("vid123")
                 .build();
 
         unpaidCourseDto = UnpaidCourseDto.builder()
@@ -370,7 +371,7 @@ class CourseServiceTest {
         courseService.updatepdf_url(testCourse.getCourse_id(), "new-pdf.pdf", "public123");
 
         assertEquals("new-pdf.pdf", testCourse.getCoursePdf_url());
-        assertEquals("public123", testCourse.getPublicId());
+        assertEquals("public123", testCourse.getPdfPublicId());
         verify(courseDAO).save(testCourse);
     }
 
@@ -384,23 +385,41 @@ class CourseServiceTest {
 
     // getPublicIdFromCourseData tests
     @Test
-    void getPublicIdFromCourseData_ValidId_ReturnsPublicId() {
-        testCourse.setPublicId("public123");
+    void getVidPublicIdFromCourseData_ValidId_ReturnsPublicId() {
+        testCourse.setVidPublicId("public123");
         when(courseDAO.findById(1L)).thenReturn(Optional.of(testCourse));
 
-        String result = courseService.getPublicIdFromCourseData(1L);
+        String result = courseService.getVidPublicIdFromCourseData(1L);
+
+        assertEquals("public123", result);
+    }
+    @Test
+    void getPdfPublicIdFromCourseData_ValidId_ReturnsPublicId() {
+        testCourse.setPdfPublicId("public123");
+        when(courseDAO.findById(1L)).thenReturn(Optional.of(testCourse));
+
+        String result = courseService.getPdfPublicIdFromCourseData(1L);
 
         assertEquals("public123", result);
     }
 
     @Test
-    void getPublicIdFromCourseData_NullPublicId_ThrowsException() {
-        testCourse.setPublicId(null);
+    void getVidPublicIdFromCourseData_NullPublicId_ThrowsException() {
+        testCourse.setVidPublicId(null);
         when(courseDAO.findById(1L)).thenReturn(Optional.of(testCourse));
 
 
         assertThrows(NullPointerException.class,
-                () -> courseService.getPublicIdFromCourseData(1L));
+                () -> courseService.getVidPublicIdFromCourseData(1L));
+    }
+    @Test
+    void getPdfPublicIdFromCourseData_NullPublicId_ThrowsException() {
+        testCourse.setPdfPublicId(null);
+        when(courseDAO.findById(1L)).thenReturn(Optional.of(testCourse));
+
+
+        assertThrows(NullPointerException.class,
+                () -> courseService.getPdfPublicIdFromCourseData(1L));
     }
 
     // updatevideo_url tests
@@ -411,7 +430,7 @@ class CourseServiceTest {
         courseService.updatevideo_url(testCourse.getCourse_id(), "new-video.mp4", "public456");
 
         assertEquals("new-video.mp4", testCourse.getCoursevideo_url());
-        assertEquals("public456", testCourse.getPublicId());
+        assertEquals("public456", testCourse.getVidPublicId());
         verify(courseDAO).save(testCourse);
     }
 

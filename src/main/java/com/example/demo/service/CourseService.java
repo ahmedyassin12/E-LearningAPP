@@ -346,7 +346,7 @@ courseValidator.validate(updateCourseDto);
 
         Course course=optionalCourse.get() ;
         course.setCoursePdf_url(pdfUrl);
-        course.setPublicId(public_Id);
+        course.setPdfPublicId(public_Id);
 
         courseDAO.save(course) ;
 
@@ -355,9 +355,9 @@ courseValidator.validate(updateCourseDto);
 
     //manager
 
-        public String  getPublicIdFromCourseData(Long course_id){
+        public String  getVidPublicIdFromCourseData(Long course_id){
 
-            String public_id= courseDAO.findById(course_id).get().getPublicId()  ;
+            String public_id= courseDAO.findById(course_id).get().getVidPublicId()  ;
 
             if (public_id!=null) return public_id ;
 
@@ -366,6 +366,17 @@ courseValidator.validate(updateCourseDto);
 
 
         }
+    public String  getPdfPublicIdFromCourseData(Long course_id){
+
+        String public_id= courseDAO.findById(course_id).get().getPdfPublicId()  ;
+
+        if (public_id!=null) return public_id ;
+
+
+        throw new NullPointerException("public_id for the course not found  ") ;
+
+
+    }
 
     //manager
     public void updatevideo_url(Long course_id,String videoUrl,String public_id){
@@ -382,7 +393,7 @@ courseValidator.validate(updateCourseDto);
 
         Course course=OptionalCourse.get() ;
         course.setCoursevideo_url(videoUrl);
-        course.setPublicId(public_id);
+        course.setVidPublicId(public_id);
         courseDAO.save(course) ;
     }
 

@@ -54,7 +54,7 @@ public class Course_Cloud_Controller {
     @DeleteMapping("/delete_pdf/{course_is}")
     public ResponseEntity<String> delete_pdf(@PathVariable("course_is") Long course_is) {
 
-        String public_id = courseService.getPublicIdFromCourseData(course_is) ;
+        String public_id = courseService.getPdfPublicIdFromCourseData(course_is) ;
         try {
             cloudinaryService.delete(public_id);
         } catch (IOException e) {
@@ -67,7 +67,7 @@ public class Course_Cloud_Controller {
     @DeleteMapping("/delete_video/{course_is}")
     public ResponseEntity<String> delete_video(@PathVariable("course_is") Long course_is) {
 
-        String public_id = courseService.getPublicIdFromCourseData(course_is) ;
+        String public_id = courseService.getVidPublicIdFromCourseData(course_is) ;
         try {
             cloudinaryService.delete(public_id);
         } catch (IOException e) {

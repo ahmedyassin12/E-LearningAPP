@@ -40,6 +40,8 @@ public CourseDto returnCourseDto(Course course){
                 .initiateCourseDto(CreateInitiateCourse(course))
                 .coursePdf_url(course.getCoursePdf_url())
                 .coursevideo_url(course.getCoursevideo_url())
+                .pdfPublicId(course.getPdfPublicId())
+                .vidPublicId(course.getVidPublicId())
                 .build();
 
 

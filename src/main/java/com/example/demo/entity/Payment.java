@@ -22,8 +22,10 @@ public class Payment {
     @Column(name = "payment_id")
     private long payment_id;
 
+
     @Column(name = "amount")
     private Double amount ;
+
 
 
     @Column(name = "paymentDate",nullable = false)

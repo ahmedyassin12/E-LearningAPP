@@ -11,7 +11,8 @@ public class ManagerCourseDto extends CourseDto {
 
 
 
-    private String publicId ;
+    private String vidPublicId ;
+    private String pdfPublicId ;
 
 
 

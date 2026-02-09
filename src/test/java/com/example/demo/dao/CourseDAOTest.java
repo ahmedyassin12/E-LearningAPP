@@ -39,7 +39,8 @@ class CourseDAOTest {
         // Given
         Formation formation = createAndPersistFormation(formateur);
         Course course = new Course();
-        course.setPublicId("hhhh");
+        course.setVidPublicId("hhhh");
+        course.setPdfPublicId("vidvidvid");
         course.setCourse_description("helo helo "); ;
         course.setCourseName("Spring Boot");
         course.setFormation(formation);

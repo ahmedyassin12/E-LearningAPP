@@ -29,10 +29,11 @@
             @Column(name = "PdfUrl")
             private String coursePdf_url;
 
-            @Column(name="public_id")
-            private String publicId ;
+            @Column(name="vidPublic_id")
+            private String vidPublicId ;
 
-
+            @Column(name="pdfPublic_id")
+            private String pdfPublicId ;
 
 
 
