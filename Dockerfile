@@ -5,7 +5,7 @@ COPY . .
 RUN mvn clean package -DskipTests
 
 # Stage 2: Run the app
-FROM openjdk:17-jdk
+FROM eclipse-temurin:17-jdk as build
 WORKDIR /app
 
 COPY --from=builder /app/target/*.jar ELearningApp.jar

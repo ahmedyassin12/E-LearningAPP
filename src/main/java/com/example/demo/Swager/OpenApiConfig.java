@@ -25,7 +25,7 @@ import io.swagger.v3.oas.annotations.servers.Server;
         servers = {
                 @Server(
 
-                        description = "Local ENV",
+                        description = "Render + neuon ENV",
                         url="https://e-learningapp-5dxn.onrender.com"
                 )
 
