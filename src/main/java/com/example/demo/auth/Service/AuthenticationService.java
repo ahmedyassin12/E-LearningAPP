@@ -51,6 +51,7 @@ public class AuthenticationService {
 
     public String registerManager(RegisterRequest request) {
 
+
         registerRequestvalidator.validate(request);
         User user;
 
@@ -66,10 +67,11 @@ public class AuthenticationService {
                     .role(Role.MANAGER)
                     .build();
 
-
         Optional<User> CheckUser = repository.findUserByEmail(user.getEmail()) ;
 
+
         if (CheckUser.isPresent()) {
+
 
             //use isEnabled to know if he is Verified
             if(   CheckUser.get().isEnabled() )
@@ -86,6 +88,7 @@ public class AuthenticationService {
 
             }
         }
+
 
 
 //new User :
