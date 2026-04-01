@@ -1,120 +1,217 @@
-# 🎓 Formation & Event Management Platform - Backend API
+# 🎓 E-Learning Backend – Formation & Event Management Platform
 
-This is a **backend system** for managing a Training Center (`Centre de Formation`) where **students can enroll in formations (multi-course programs) or events**. Managers assign instructors (formateurs) to courses, and the system provides full tracking of participation and feedback.
+[![Java](https://img.shields.io/badge/Java-17-blue.svg)](https://adoptium.net/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-Swagger%20UI-success)](https://e-learningapp-5dxn.onrender.com/swagger-ui/index.html)
 
-> 🛡️ Includes robust **JWT-based authentication**, full **CRUD support**, **Dockerized PostgreSQL**, **Cloudinary integration**, and insightful **ETL dashboards via Power BI**.
+A **production-style backend system** for a coding school where students enroll in **formations (multi-course programs)** or **events**. The platform manages instructors, payments, and secure access to content using **time-based business rules**.
 
----
-
-## 🚀 Key Features
-
-### 👨‍🎓 Student Module:
-- Register and update personal info
-- Enroll in **formations** (programs with multiple courses)
-- Sign up for **events**
-
-### 👨‍🏫 Manager Module:
-- Manage formations, courses, and events
-- Assign courses to formateurs
-- View ratings and participation metrics
-
-### ⚙️ Full CRUD Operations
-All core entities (Students, Formations, Courses, Events, Managers,Enrollement) support:
-- **Create**
-- **Read**
-- **Update**
-- **Delete**
-
-### 🔐 JWT Security (JSON Web Token)
-
-- Implements **stateless authentication** using JWT
-- Each request must include a valid token in headers
-- Access is controlled by **user roles** (e.g., student, manager, admin)
-- Token contains user identity and role info for secured endpoints
-- Expiration and refresh logic ensures optimal security and performance
-- **Efficient filtering and exception handling** to prevent unauthorized access
-
-> 🛡️ Your app is protected by token-based security that scales — no sessions, just signed tokens and smart middleware.
-
-![image](https://github.com/user-attachments/assets/73491dcd-1707-427c-8e4e-091c0588a5f7)
+> ✅ **Live Swagger UI**: [https://e-learningapp-5dxn.onrender.com/swagger-ui/index.html](https://e-learningapp-5dxn.onrender.com/swagger-ui/index.html)
+> *(Free tier may cold start – wait a few seconds if a 503 appears.)*
 
 ---
 
-## 📊 Power BI Dashboard Highlights
+## ⭐ Key Highlights
 
-- 📈 **Average Student Age** per event/formation  
-- 📆 **Engagement Trend** per month  
-- 🎟️ **Attendance tracking** per event  
-- ⭐ **Rating visualizations** for events and formations
-![image](https://github.com/user-attachments/assets/2a0b2c68-1158-4270-b1fc-e2d118fe3168)
-![image](https://github.com/user-attachments/assets/b0da8a45-c3a8-476d-9709-a8bebd13ad87)
+* 🔐 Secure authentication using **JWT + Refresh Token rotation**
+* 📧 **Email verification flow** before account activation (secure onboarding)
+* ⏱️ **Automated access control** based on payment validity (scheduled jobs)
+* 🧠 Clean architecture using **DTOs, validation, and global exception handling**
+* ⚡ Performance optimization using **caching (Ehcache)**
+* ☁️ Media management with **Cloudinary integration**
+* 🐳 Fully **Dockerized environment** (API + PostgreSQL)
+* 🧪 Tested with **JUnit (unit & integration)** + Postman
+* 📄 Fully documented API with **Swagger (OpenAPI)**
 
-> All metrics are updated using Power BI's ETL pipeline that queries your PostgreSQL database.
+---
+
+## 🏗️ Architecture
+
+The application follows a **layered architecture**:
+
+* **Controller Layer** → Handles HTTP requests and responses
+* **Service Layer** → Contains business logic
+* **Repository Layer** → Manages database interaction (JPA/Hibernate)
+* **DTO Layer** → Ensures secure and controlled data transfer
+* **Security Layer** → JWT-based authentication and authorization
+* **Exception Handling** → Centralized via `GlobalExceptionHandler`
+
+This design ensures **scalability, maintainability, and separation of concerns**.
+
+---
+
+## 🚀 Core Features
+
+### 👨‍🏫 Manager
+
+* Full CRUD for formations, courses, events, users, payments
+* Assign instructors to formations (minimum one required)
+* Manage student enrollments and payments
+* Upload media (videos, PDFs, images) via Cloudinary
+
+### 👨‍🎓 Student
+
+* Register and manage profile (validated inputs)
+* 📧 Verify email before account activation
+* Enroll in formations (requires active payment)
+* Enroll in events
+* Access course content only when payment is valid
+
+### 👨‍🏫 Instructor
+
+* View assigned formations and courses
+* Update profile and availability
+
+---
+
+## 📧 Email Verification Flow
+
+* Upon registration, users receive a **verification email** containing a unique token
+* The account remains **inactive until email is verified**
+* Verification endpoint activates the account securely
+* Prevents fake accounts and strengthens authentication flow
+
+👉 This simulates real-world **secure onboarding practices** used in production systems
+
+---
+
+## 🔁 Automated Access Control (Key Business Logic)
+
+* Each **Enrollment** is linked to **Payment records**
+* A scheduled job runs daily:
+
+  * If last payment ≤ 30 days → `PAID`
+  * Otherwise → `NOT_PAID`
+* Access to course content is **strictly controlled** by this status
+
+👉 This simulates a real-world **subscription-based access system**
+
+---
+
+## 🔐 Security
+
+* Stateless authentication using **JWT (access + refresh tokens)**
+* Role-based authorization: `MANAGER`, `STUDENT`, `FORMATEUR`
+* Secure endpoints via Spring Security filters
+* Token expiration + refresh flow implemented
+* Email verification required before login access
+
+---
+
+## ✅ Validation & Error Handling
+
+* Input validation using `@Valid`, `@NotNull`, `@Pattern`, and custom annotations
+* Centralized error handling via `GlobalExceptionHandler`
+* Structured error responses
+
+**Example:**
+
+```json
+{
+  "status": 400,
+  "message": "Validation failed",
+  "errors": {
+    "phoneNumber": "Invalid format",
+    "password": "Weak password"
+  }
+}
+```
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Tool/Tech         | Purpose                              |
-|-------------------|--------------------------------------|
-| **Spring Boot**   | Backend API + Security (JWT)         |
-| **PostgreSQL**    | Relational Database (Dockerized)     |
-| **Cloudinary**    | Store student/course images          |
-| **Power BI**      | ETL & Dashboard                      |
-| **Docker**        | Running PostgreSQL locally           |
-| **JPA (Hibernate)** | ORM to manage entities             | 
-|**Postman**        |  Manual API testing and debugging    |
-|**Swager**         | API documentation and interactive testing UI|
-
+* **Spring Boot** – REST API development
+* **Spring Security + JWT** – Authentication & Authorization
+* **Spring Data JPA (Hibernate)** – ORM
+* **PostgreSQL** – Relational Database
+* **Ehcache** – Caching layer
+* **Docker & Docker Compose** – Containerization
+* **Cloudinary** – Media storage
+* **Swagger (OpenAPI)** – API documentation
+* **JUnit 5 & Mockito** – Testing
+* **Postman** – API testing
 
 ---
 
-## 🐳 PostgreSQL via Docker
+## ⚙️ Setup & Run
 
-Launch PostgreSQL with Docker:
+### 🐳 Docker (Recommended)
 
-docker-compose -f docker/postgres-compose.yml up -d
+```bash
+git clone https://github.com/your-username/E-LearningAPP.git
+cd E-LearningAPP
+docker-compose up --build
+```
 
+Access:
 
+* API → [http://localhost:8080](http://localhost:8080)
+* Swagger → [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
 
-🧪 Running the Project
-Follow the steps below to get the project up and running locally.
+---
 
+## 🔑 Environment Variables
 
-📦 1. Clone the Repository
-git clone https://github.com/your-username/your-repo-name.git
-cd your-repo-name
+```properties
+POSTGRES_DB=elearning_db
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=your_password
 
-⚙️ 2. Configure the Application
-Open the file:
-src/main/resources/application.properties
+JWT_SECRET=your_secret
+JWT_REFRESH_SECRET=your_refresh_secret
 
-And update the following according to your environment 
+CLOUDINARY_CLOUD_NAME=your_cloud
+CLOUDINARY_API_KEY=your_key
+CLOUDINARY_API_SECRET=your_secret
+```
 
-🐳 3. Start PostgreSQL with Docke
-docker run --name training-db \
-    -e POSTGRES_DB=your_db \
-    -e POSTGRES_USER=your_user \
-    -e POSTGRES_PASSWORD=your_password \
-    -p 5432:5432 \
-    -d postgres
-  🔐 Ensure the DB credentials match what's in application.properties.
-  
-  📌 Future Improvements
-Add email notifications on event registration
+> ⚠️ Never commit secrets. Use `.env` files or environment configs.
 
-Enable search & filter in formations
+---
 
-Add comments/feedback system linked to Power BI
+## 📡 API Documentation
 
-Deploy backend to a cloud server (Heroku / AWS / Render)
+All endpoints are available via Swagger:
+👉 [https://e-learningapp-5dxn.onrender.com/swagger-ui/index.html](https://e-learningapp-5dxn.onrender.com/swagger-ui/index.html)
 
-👤 Author
+---
+
+## 🧪 Testing
+
+```bash
+mvn test
+```
+
+* Unit & integration tests implemented
+* Manual testing via Postman
+
+---
+
+## 🚢 Deployment
+
+* Deployed on **Render (free tier)**
+* May experience cold starts after inactivity
+
+---
+
+## 📌 Future Improvements
+
+* Payment gateway integration (Stripe)
+* Email notifications & reminders
+* Advanced filtering/search
+* Feedback & rating system
+*Ci/Cd pipeline
+---
+
+## 👤 Author
+
 Ahmed Yassine
-🎓 Final-year Business Intelligence student
-⚙️ Backend Developer | BI Enthusiast
+Backend Developer 
 
-📝 License
-This project is licensed under the MIT License.
-# E-LearningAPP
-# E-LearningAPP
+---
+
+## 📝 License
+
+MIT License
