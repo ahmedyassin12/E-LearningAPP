@@ -18,7 +18,6 @@ A **production-style backend system** for a coding school where students enroll 
 * 📧 **Email verification flow** before account activation (secure onboarding)
 * ⏱️ **Automated access control** based on payment validity (scheduled jobs)
 * 🧠 Clean architecture using **DTOs, validation, and global exception handling**
-* ⚡ Performance optimization using **caching (Ehcache)**
 * ☁️ Media management with **Cloudinary integration**
 * 🐳 Fully **Dockerized environment** (API + PostgreSQL)
 * 🧪 Tested with **JUnit (unit & integration)** + Postman
@@ -126,7 +125,6 @@ This design ensures **scalability, maintainability, and separation of concerns**
 * **Spring Security + JWT** – Authentication & Authorization
 * **Spring Data JPA (Hibernate)** – ORM
 * **PostgreSQL** – Relational Database
-* **Ehcache** – Caching layer
 * **Docker & Docker Compose** – Containerization
 * **Cloudinary** – Media storage
 * **Swagger (OpenAPI)** – API documentation
