@@ -12,7 +12,7 @@ import java.lang.annotation.*;
 public @interface UsernameValidator {
 
 
-    String message() default "Size must be within limit and  only Alphanumeric characters acceptable";
+    String message() default "Username Size must be within limit and  only Alphanumeric characters acceptable";
 
     int min()default 1 ;
 
