@@ -1,6 +1,9 @@
     package com.example.demo.configuration;
 
+    import com.example.demo.Dtos.tokenDto.TokenDto;
     import com.example.demo.dao.TokenDAO;
+    import com.example.demo.service.TokenService;
+    import com.example.demo.token.TokenType;
     import jakarta.servlet.FilterChain;
     import jakarta.servlet.ServletException;
     import jakarta.servlet.http.HttpServletRequest;
@@ -24,7 +27,7 @@
         private final JwtService jwtService;
         private final  UserDetailsService userDetailsService ;
         private final TokenDAO tokenDAO ;
-
+        private final TokenService tokenService;
 
         @Override
         protected void doFilterInternal(
@@ -40,7 +43,6 @@
             final String jwt  ;
             final String Username;
 
-            System.out.println("authHeader = "+authHeader);
             if(authHeader==null|| !authHeader.startsWith("Bearer ") ){
 
                 System.out.println("blocker  0");
@@ -48,21 +50,29 @@
                 return ;
 
             }
-            System.out.println("blocker  1");
 
             jwt=authHeader.substring(7) ;
 
             Username=jwtService.extractUserName(jwt) ;
-            System.out.println("blocker  2 : "+Username);
+
+            TokenDto tokenDb = tokenService.getToken(jwt);
+
+
+            if( tokenDb.getTokenType()!= TokenType.BEARER)     {
+
+
+                filterChain.doFilter(request,response);
+                return;
+            }
 
             if(Username!=null && SecurityContextHolder.getContext().getAuthentication()==null){
 
 
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(Username) ;
 
-                var isTokenValid = tokenDAO.findByToken(jwt) .map(t->!t.isExpired()&&!t.isRevoked())
-                        .orElse(false) ;
+boolean isTokenValid =true;
 
+if(tokenDb.isRevoked()) isTokenValid=false;
 
 
                     if(jwtService.IsTokenValid(jwt,userDetails) &&isTokenValid) {

@@ -25,7 +25,7 @@ public class EnrollementDto {
 
 
 
-    private int rating;
+    private Integer rating;
 
     @NotNull
     private LocalDate enrollementDate;

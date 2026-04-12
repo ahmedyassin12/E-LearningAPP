@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 
+import com.example.demo.Dtos.fieldDto.FieldDto;
 import com.example.demo.entity.Field;
 import com.example.demo.service.FieldService;
 import jakarta.annotation.PostConstruct;
@@ -19,26 +20,27 @@ public class FieldController {
     private final FieldService fieldService;
 
     @PostMapping("/createField")
-    public ResponseEntity<Field> createField(@RequestBody Field field) {
+    public ResponseEntity<FieldDto> createField(@RequestBody FieldDto fieldDto) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(fieldService.createField(field));
+                .body(fieldService.createField(fieldDto));
     }
 
     @GetMapping("/getAllFields")
-    public ResponseEntity<List<Field>> getAllFields() {
+    public ResponseEntity<List<FieldDto>> getAllFields() {
         return ResponseEntity.ok(fieldService.getAllFields());
+
     }
 
     @GetMapping("/getFieldById/{id}")
-    public ResponseEntity<Field> getFieldById(@PathVariable Long id) {
+    public ResponseEntity<FieldDto> getFieldById(@PathVariable Long id) {
 
         return ResponseEntity.ok(fieldService.getFieldById(id));
 
     }
 
     @PutMapping("/updateField")
-    public ResponseEntity<Field> updateField(
-          @RequestBody Field field) {
+    public ResponseEntity<FieldDto> updateField(
+          @RequestBody FieldDto field) {
         return ResponseEntity.ok(fieldService.updateField(field));
     }
 

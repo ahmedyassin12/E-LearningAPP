@@ -18,10 +18,13 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.AccessDeniedException;
+import org.springframework.cache.annotation.CacheEvict;
+
+import org.springframework.cache.annotation.Caching;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+import java.security.Key;
 import java.security.Principal;
 import java.util.*;
 
@@ -41,6 +44,8 @@ public class FormationService {
     @Autowired
     private ObjectValidator<CreateFormationDto> formationValidator ;
 
+@Autowired
+private FormationCacheService formationCacheService;
 
 
     private FormationMapper formationMapper =new FormationMapper() ;
@@ -54,47 +59,7 @@ public class FormationService {
 
         User user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
 
-        Iterable<Formation>formations=formationDAO.findAll();
-
-
-        if (formations.iterator().hasNext()){
-
-            if(user.getRole().equals(Role.MANAGER)){
-
-                List<FormationManagerDto>formationManagerDtos=new ArrayList<>();
-
-                formations.forEach(formation ->
-                        formationManagerDtos.   add(
-                                formationMapper.returnformationManagerDto(formation)
-                        ) );
-
-
-                return formationManagerDtos ;
-
-            }
-
-            else if (user.getRole() == Role.STUDENT) {
-
-                boolean isPaid;
-                boolean isEnrolled;
-
-                List<FormationStudentDto>formationStudentDtos=new ArrayList<>() ;
-
-                for(Formation formation:formations){
-                    isEnrolled=enrollementDAO.isStudentEnrolled(user.getId(), formation.getId()) ;
-                    isPaid= enrollementDAO.isEnrollmentPaid(user.getId(), formation.getId());
-
-                    formationStudentDtos.add(formationMapper.returnformationStudentDto(formation,isPaid,isEnrolled));
-
-
-                }
-
-                return formationStudentDtos ;
-
-            }
-        }
-
-        throw  new EntityNotFoundException("Formations are empty") ;
+       return formationCacheService.CachedGetAllFormations(user);
 
 
     }
@@ -124,6 +89,10 @@ public class FormationService {
 
     }
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "studentFormation",allEntries = true),
+            @CacheEvict(cacheNames = "AllStudentFormations", allEntries = true)
+    })
     //manager
     public void updateFormationImage(Long formationId, String imageUrl,String publicID) {
         Optional<Formation> optionalFormation = formationDAO.findById(formationId);
@@ -231,41 +200,19 @@ public class FormationService {
 
     //formateur,student,manager
 
+
     public Object getFormationByName(String formationName, Principal connectedUser) {
         User user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
 
+        return formationCacheService.GetchachedFormationByName(user,formationName);
         // Handle Formateur case first
-        if (user.getRole() == Role.FORMATEUR) {
-            Formation formation = formationDAO.findFormationByNameForFormateur(formationName, user.getId())
-                    .orElseThrow(() -> new AccessDeniedException(
-                            "Formateur not associated with formation: " + formationName
-                    ));
-            return formationMapper.returnformationDto(formation) ;
-
-
-        }
-
-        // Handle other roles
-        Formation formation = formationDAO.findFormationByName(formationName)
-                .orElseThrow(() -> new EntityNotFoundException(formationName));
-
-        if (user.getRole() == Role.STUDENT) {
-
-            boolean isPaid= enrollementDAO.isEnrollmentPaid(user.getId(), formation.getId());
-            boolean isEnrolled= enrollementDAO.isStudentEnrolled(user.getId(), formation.getId());
-
-            return formationMapper.returnformationStudentDto(formation,isPaid,isEnrolled);
-
-        }
-
-        if (user.getRole() == Role.MANAGER) {
-            return  formationMapper.returnformationManagerDto(formation);
-        }
-
-        throw new AccessDeniedException("Unauthorized role: " + user.getRole());
     }
 
 
+
+
+
+    @CacheEvict(cacheNames = "AllStudentFormations", allEntries = true)
     //manager
     public FormationManagerDto  createNewFormation(CreateFormationDto createFormationDto ){
 
@@ -307,6 +254,10 @@ public class FormationService {
 
     }
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "studentFormation",allEntries = true),
+            @CacheEvict(cacheNames = "AllStudentFormations", allEntries = true)
+    })
     public void rem_Formation(Long id ){
 
         formationDAO.findById(id)
@@ -324,6 +275,11 @@ public class FormationService {
 
 
     //manager
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "studentFormation",allEntries = true),
+            @CacheEvict(cacheNames = "AllStudentFormations", allEntries = true)
+    })
+
     public FormationDto update_formation(CreateFormationDto createFormationDto) {
 
 
@@ -362,6 +318,7 @@ public class FormationService {
         }
 
         throw new EntityNotFoundException("cant find formation to update !! ");
+
     }
 
 

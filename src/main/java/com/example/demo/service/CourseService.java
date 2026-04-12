@@ -14,6 +14,8 @@ import com.example.demo.validator.ObjectValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.repository.query.Param;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,6 +33,9 @@ public class CourseService {
     @Autowired
     private CourseDAO courseDAO;
 
+
+    @Autowired
+    private CourseCacheService courseCacheService;
 
     @Autowired
     private FormationDAO formationDAO ;
@@ -117,69 +122,10 @@ private ObjectValidator<CreateCourseDto> courseValidator ;
 //formateur , manager , Student
     public Iterable<?> getFormationCourses(@Param("formation_id") Long formation_id, Principal connectedUser){
 
+
         var user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
-        Iterable<Course> courses=this.courseDAO.getFormationCourses(formation_id);
 
-        if(courses.iterator().hasNext()) {
-
-
-          Course course=  courses.iterator().next();
-
-            if(user.getRole().equals(Role.STUDENT)){
-
-                boolean isPaid=enrollementDAO.isEnrollmentPaid(user.getId(),course.getCourse_id() );
-
-                if(isPaid) {
-
-
-                    List<CourseDto> courseDtos=new ArrayList<>();
-                    courses.forEach(c->courseDtos.add(courseMapper.returnCourseDto(c)) );
-
-                    return courseDtos ;
-
-                }
-
-                else {
-                    List<UnpaidCourseDto> unpaidDtos=new ArrayList<>();
-                    courses.forEach(c->unpaidDtos.add(courseMapper.returns_UnpaidCourseDto(c)) );
-
-                    return unpaidDtos ;
-
-                }
-
-            }
-            else if (user.getRole() == Role.MANAGER) {
-
-                List<ManagerCourseDto> managerCourseDtos=new ArrayList<>();
-                courses.forEach(c->managerCourseDtos.add(courseMapper.returnManagerCourseDto(c)) );
-
-                return managerCourseDtos ;
-
-            } else if (user.getRole()==Role.FORMATEUR) {
-
-
-                Formation formation = formationDAO.findFormationByNameForFormateur(course
-                                        .getFormation().getFormationName()
-                                , user.getId())
-                        .orElseThrow(() -> new AccessDeniedException(
-                                "Formateur not associated with formation: "
-                                        +course.getFormation().getFormationName()
-                        ));
-
-                List<CourseDto> courseDtos=new ArrayList<>();
-                courses.forEach(c->courseDtos.add(courseMapper.returnCourseDto(c)) );
-
-                return courseDtos ;
-
-
-            } else {
-                throw new AccessDeniedException("Role not authorized to access this resource");
-            }
-
-        }
-
-        throw new EntityNotFoundException("no courses found") ;
-
+return courseCacheService.getCachedFormationCourses(user,formation_id);
 
     }
 
@@ -207,69 +153,12 @@ private ObjectValidator<CreateCourseDto> courseValidator ;
 
             var user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal() ;
 
-            Optional<Course> optional = courseDAO.findCourseBycourseName(courseName);
-
-            Course course;
-
-            if (optional.isPresent()) {
-
-                course = optional.get();
-
-                if (user.getRole() == Role.STUDENT) {
-
-            boolean isPaid=enrollementDAO.isEnrollmentPaid(user.getId(),course.getFormation().getId() );
-
-            if(isPaid) {
-                return courseMapper.returnCourseDto(course) ;
-            }
-
-                 else {
-                     UnpaidCourseDto courseDto = courseMapper.returns_UnpaidCourseDto(course);
-                return  courseDto;
-
-            }
-
-
-                }
-
-                else if (user.getRole().equals(Role.MANAGER) ) {
-
-                    return  courseMapper.returnManagerCourseDto(course);
-
-
-                } else if (user.getRole()==Role.FORMATEUR) {
-
-
-                        Formation formation = formationDAO.findFormationByNameForFormateur(course
-                                        .getFormation().getFormationName()
-                                        , user.getId())
-                                .orElseThrow(() -> new AccessDeniedException(
-                                        "Formateur not associated with formation: "
-                                                +course.getFormation().getFormationName()
-                                ));
-
-                        return courseMapper.returnCourseDto(course) ;
-
-
-
-                } else {
-                    throw new AccessDeniedException("Role not authorized to access this resource");
-                }
-
-            }
-
-
-
-                throw new EntityNotFoundException( "course not found for name  ::  " + courseName);
-
-
-
-
+return courseCacheService.getCachedCourse(user,courseName);
 
         }
 
     //manager
-
+    @CacheEvict(cacheNames = "GetCourses",allEntries = true)
     public CourseDto  createNewCourse(CreateCourseDto createCourseDto) {
 
         courseValidator.validate(createCourseDto);
@@ -289,6 +178,11 @@ private ObjectValidator<CreateCourseDto> courseValidator ;
 
 
     //manager
+
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "GetCourses",allEntries = true),
+            @CacheEvict(cacheNames = "GetCourse", allEntries = true)
+    })
     public String rem_Course(Long id) {
 
         courseDAO.findById(id)
@@ -302,6 +196,10 @@ return "Course removed successfully";
 
 
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "GetCourses",allEntries = true),
+            @CacheEvict(cacheNames = "GetCourse", allEntries = true)
+    })
     //manager
     public CourseDto update_Course(CreateCourseDto updateCourseDto) {
 
@@ -334,6 +232,10 @@ courseValidator.validate(updateCourseDto);
 
     //manager
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "GetCourses",allEntries = true),
+            @CacheEvict(cacheNames = "GetCourse", allEntries = true)
+    })
     public void updatepdf_url(Long course_id, String pdfUrl, String public_Id){
 
         Optional<Course> optionalCourse = courseDAO.findById(course_id) ;
@@ -378,6 +280,10 @@ courseValidator.validate(updateCourseDto);
 
     }
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "GetCourses",allEntries = true),
+            @CacheEvict(cacheNames = "GetCourse", allEntries = true)
+    })
     //manager
     public void updatevideo_url(Long course_id,String videoUrl,String public_id){
 

@@ -25,6 +25,7 @@ public class Formation {
 
     @Column(name = "Description")
     private String description;
+
     @Column(name = "date",nullable = false)
     private LocalDate date;
 

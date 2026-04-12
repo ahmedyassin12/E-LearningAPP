@@ -4,6 +4,8 @@
     import com.example.demo.token.Token;
     import com.fasterxml.jackson.annotation.JsonIdentityInfo;
     import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+    import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+    import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
     import jakarta.persistence.*;
     import lombok.AllArgsConstructor;
     import lombok.Data;
@@ -54,6 +56,7 @@
         @Column(name = "phoneNumber", nullable = false)
         private String phoneNumber;
 
+        @JsonDeserialize(using = LocalDateDeserializer.class)
         @Column(name = "dateNaissance")
         private LocalDate dateNaissance;
 

@@ -1,5 +1,9 @@
 package com.example.demo.Dtos.formationDto;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -27,6 +31,7 @@ public class FormationDto {
     private String description;
 
     @NotNull
+    @JsonDeserialize(using = LocalDateDeserializer.class)
     private LocalDate date;
 
 

@@ -12,6 +12,8 @@ import com.example.demo.mapper.PaymentMapper;
 import com.example.demo.validator.ObjectValidator;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
@@ -178,8 +180,14 @@ throw new EntityNotFoundException("No payment found") ;
 
 
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "studentFormation",allEntries = true),
+            @CacheEvict(cacheNames = "AllStudentFormations", allEntries = true),
+            @CacheEvict(cacheNames = "GetCourses",allEntries = true),
+            @CacheEvict(cacheNames = "GetCourse", allEntries = true)
 
 
+    })
     //manager
     public PaymentDto createPayment(CreatePaymentDto createPaymentDto ) {
 
@@ -207,7 +215,14 @@ throw new EntityNotFoundException("No payment found") ;
 
 
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "studentFormation",allEntries = true),
+            @CacheEvict(cacheNames = "AllStudentFormations", allEntries = true),
+            @CacheEvict(cacheNames = "GetCourses",allEntries = true),
+            @CacheEvict(cacheNames = "GetCourse", allEntries = true)
 
+
+    })
 
     public PaymentDto updatePayment(CreatePaymentDto updatePaymentDto) {
 
@@ -231,6 +246,15 @@ throw new EntityNotFoundException("No payment found") ;
 
     }
 
+
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "studentFormation",allEntries = true),
+            @CacheEvict(cacheNames = "AllStudentFormations", allEntries = true),
+            @CacheEvict(cacheNames = "GetCourses",allEntries = true),
+            @CacheEvict(cacheNames = "GetCourse", allEntries = true)
+
+
+    })
     public String deletePayment(long payment_id) {
 
         Payment payment=paymentRepository.findById(payment_id).orElseThrow(()->new EntityNotFoundException(

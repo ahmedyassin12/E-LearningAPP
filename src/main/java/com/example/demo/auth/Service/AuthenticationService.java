@@ -1,18 +1,23 @@
 package com.example.demo.auth.Service;
 
+import com.example.demo.Dtos.tokenDto.TokenDto;
 import com.example.demo.auth.Dto.*;
 import com.example.demo.configuration.JwtService;
 import com.example.demo.dao.*;
 import com.example.demo.entity.*;
 import com.example.demo.entity.Enums.Role;
+import com.example.demo.service.TokenService;
 import com.example.demo.token.Token;
 import com.example.demo.token.TokenType;
 import com.example.demo.token.VerificationToken;
 import com.example.demo.validator.ObjectValidator;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
+import org.springframework.cache.CacheManager;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -20,11 +25,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @Transactional
@@ -44,8 +47,9 @@ public class AuthenticationService {
     private final ObjectValidator<StudentRequest> studentRequestvalidator ;
     private final ObjectValidator<FormateurRequest> formateurRequestvalidator ;
     private final ObjectValidator<AuthenticationRequest> authenticationRequestvalidator ;
+    private final CacheManager cacheManager;
 
-
+private final TokenService tokenService;
     private final EmailService emailService ;
 
 
@@ -67,7 +71,7 @@ public class AuthenticationService {
                     .role(Role.MANAGER)
                     .build();
 
-        Optional<User> CheckUser = repository.findUserByEmail(user.getEmail()) ;
+        Optional<User> CheckUser = repository.findByUsername(user.getUsername()) ;
 
 
         if (CheckUser.isPresent()) {
@@ -137,7 +141,7 @@ public class AuthenticationService {
                 .age(request.getAge())
                 .build();
 
-        Optional<User> CheckUser = repository.findUserByEmail(student.getEmail()) ;
+        Optional<User> CheckUser = repository.findByUsername(student.getUsername()) ;
 
         if (CheckUser.isPresent()) {
 
@@ -208,19 +212,22 @@ public class AuthenticationService {
                 .availability(request.getAvailability())
                 .build();
 
-        Optional<User> CheckUser = repository.findUserByEmail(formateur.getEmail()) ;
+        Optional<User> CheckUser = repository.findByUsername(formateur.getUsername()) ;
 
         if (CheckUser.isPresent()) {
 
+            System.out.println("he is presesnt no ??");
             //use isEnabled to know if he is Verified
             if(   CheckUser.get().isEnabled() )
             {
+                System.out.println("enabled ?");
                 throw new IllegalArgumentException("User already verified") ;
 
             }
 
             //if user exist but didnt verified
             else {
+                System.out.println(" Not enabled ?");
 
                 //user exist, but it's not verified so we go and verify him :
                 return createAndSendVerificationToken(CheckUser.get());
@@ -228,7 +235,8 @@ public class AuthenticationService {
             }
         }
 
-        System.out.println("\n \n formateur : "+formateur+"\n \n");
+
+        System.out.println("he is not Present really ?? ??");
 
         var savedUser= repository.save(formateur) ;
 
@@ -243,7 +251,6 @@ public class AuthenticationService {
     public AuthenticationResponse authenticate(AuthenticationRequest request) throws BadRequestException {
 
         authenticationRequestvalidator.validate(request);
-        System.out.println("username = "+request.getUsername() +" pass = "+request.getPassword());
         try {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -264,23 +271,34 @@ public class AuthenticationService {
                 new UsernameNotFoundException("User not found with username : " + request.getUsername())
         );
 
-        var jwtToken = jwtService.generateToken(user);
+        var jwtToken = jwtService.generateAccessToken(user);
+
+        var refreshToken=jwtService.generateRefreshToken(user);
 
         revokeAllUserTokens(user);
 
-        saveUserToken(user,jwtToken);
-        
+        List<Token> tokens = tokenDAO.findAllValidTokenByUser(user.getId()) ;
+
+
+        tokens.forEach(t-> Objects.requireNonNull(cacheManager.getCache("JwtTokens")).evict(t.getToken()) );
+
+
+
+        saveUserToken(user,jwtToken,TokenType.BEARER);
+        saveUserToken(user,refreshToken,TokenType.REFRESHTOKEN);
+
         return AuthenticationResponse.builder()
-                .token(jwtToken)
+                .accessToken(jwtToken)
+                .refreshToken(refreshToken)
                 .build();
 
     }
 
-    private void saveUserToken(User user, String jwtToken) {
+    private void saveUserToken(User user, String jwtToken,TokenType tokenType) {
         var token = Token.builder()
                 .user(user)
                 .token(jwtToken)
-                .tokenType(TokenType.BEARER)
+                .tokenType(tokenType)
                 .revoked(false)
                 .expired(false)
                 .build() ;
@@ -305,5 +323,79 @@ public class AuthenticationService {
         tokenDAO.saveAll(validUserTokens);
 
     }
+
+
+    @Transactional
+    public AuthenticationResponse refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
+
+
+
+        final String authHeader = request.getHeader("Authorization");
+        final String refreshToken;
+        final String Username;
+
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+
+            //Skip JWT logic and pass the request down the chain.
+
+            return null;
+        }
+
+        refreshToken = authHeader.substring(7);
+
+        Username = jwtService.extractUserName(refreshToken);
+
+
+        if (Username != null ) {
+
+            var user = this.repository.findByUsername(Username).orElseThrow();
+
+            TokenDto checkToken=  tokenService.getToken(refreshToken);
+
+
+            boolean isTokenValid ;
+
+            if( ! checkToken.isRevoked()) {
+
+                isTokenValid=true ;
+
+            }
+            else{
+                isTokenValid=false;
+            }
+
+
+            if (jwtService.IsTokenValid(refreshToken, user)
+                    && isTokenValid
+            ) {
+
+                var accessToken=jwtService.generateAccessToken(user) ;
+
+
+                tokenDAO.revokeBearerTokensByUser(user.getId());
+
+                List<Token> tokens = tokenDAO.findAllValidBearerTokenByUser(user.getId()) ;
+
+                tokens.forEach(t-> cacheManager.getCache("JwtTokens").evict( t.getToken() ) );
+
+                saveUserToken(user,accessToken,TokenType.BEARER);
+
+                var  authResponse= AuthenticationResponse.builder()
+                        .accessToken(accessToken)
+                        .refreshToken(refreshToken)
+                        .build();
+
+                return  authResponse ;
+            }
+
+
+        }
+
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED) ;
+        return  null;
+    }
+
 
 }

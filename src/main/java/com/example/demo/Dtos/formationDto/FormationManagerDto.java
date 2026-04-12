@@ -9,6 +9,8 @@ import lombok.experimental.SuperBuilder;
 @Getter @Setter
 public class FormationManagerDto extends FormationDto {
 
+
+
     private String publicId ;
 
 

@@ -34,8 +34,8 @@ return ResponseEntity
     public ResponseEntity<?>handleException(EntityNotFoundException e){
 
         return ResponseEntity
-                .notFound()
-                .build() ;
+                .badRequest()
+                .body(e.getMessage());
 
 
     }

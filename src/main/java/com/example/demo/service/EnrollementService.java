@@ -12,6 +12,8 @@ import com.example.demo.validator.ObjectValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
@@ -36,6 +38,9 @@ public class EnrollementService {
 
     @Autowired
     private ObjectValidator<EnrollementDto>enrollementValidator ;
+
+    @Autowired
+    private EnrollementCacheService enrollementCacheService;
 
 
     //manager:
@@ -158,7 +163,10 @@ public class EnrollementService {
 
     }
 
-    //Manager
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "studentFormation",allEntries = true),
+            @CacheEvict(cacheNames = "AllStudentFormations", allEntries = true)
+    })    //Manager
     public EnrollementDto createNewEnrollement(EnrollementDto enrollementDto ) {
 
         enrollementValidator.validate(enrollementDto);
@@ -180,35 +188,23 @@ public class EnrollementService {
 
     }
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "studentFormation",allEntries = true),
+            @CacheEvict(cacheNames = "AllStudentFormations", allEntries = true)
+    })
     //student
     public EnrollementDto EnrollInFormation(Principal connectedUser, String formationName ) {
         User user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
 
 
-        if( ! user.getRole().equals(Role.STUDENT)) throw new IllegalArgumentException("this is only accessible by Students !!") ;
-
-
-        Formation formation = formationDAO.findFormationByName(formationName).orElseThrow(()->
-                new EntityNotFoundException("Formation name not Found "));
-
-        Student student=studentDAO.findById(user.getId()).orElseThrow(()->new EntityNotFoundException("student not found "));
-
-        Enrollement enrollement = Enrollement.builder()
-                .payment_Status(PaymentStatus.UnPaid)
-                .enrollement_date(LocalDate.now())
-                .formation(formation)
-                .student(student)
-                .build();
-
-
-        enrollementDAO.save(enrollement);
-        log.info("Enrollement {} is saved", enrollement.getEnrollement_id());
-        return enrollementMapper.returnEnrollementDto(enrollement);
-
-
+return enrollementCacheService.CachedEnrollInFormation(user,formationName);
 
     }
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "studentFormation",allEntries = true),
+            @CacheEvict(cacheNames = "AllStudentFormations", allEntries = true)
+    })
     //manager
     public String removeEnrollement(Long id) {
         enrollementDAO.findById(id)
@@ -219,6 +215,10 @@ public class EnrollementService {
 
     }
 
+    @Caching(evict = {
+            @CacheEvict(cacheNames = "studentFormation",allEntries = true),
+            @CacheEvict(cacheNames = "AllStudentFormations", allEntries = true)
+    })
     //manager
     public EnrollementDto updateEnrollement(EnrollementDto enrollementDto) {
 

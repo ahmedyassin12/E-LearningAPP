@@ -1,15 +1,18 @@
 package com.example.demo.service;
 
+import com.example.demo.Dtos.fieldDto.FieldDto;
 import com.example.demo.dao.FieldDao;
 
 import com.example.demo.entity.Field;
 
 import com.example.demo.entity.Skill;
+import com.example.demo.mapper.FieldMapper;
 import com.example.demo.validator.ObjectValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,43 +22,58 @@ import java.util.stream.Collectors;
 public class FieldService {
 
     private final FieldDao fieldRepository;
-    private final ObjectValidator<Field> fieldValidator;
+    private final ObjectValidator<FieldDto> fieldValidator;
 
-    public Field createField(Field field) {
+    private FieldMapper fieldMapper=new FieldMapper();
+    public FieldDto createField(FieldDto fieldDto) {
 
-        if (fieldRepository.existsByFieldNameIgnoreCase(field.getFieldName())) {
 
-            throw new IllegalArgumentException("Field"+field.getFieldName()+" already exists") ;
-        }
-        fieldValidator.validate(field);
+        fieldValidator.validate(fieldDto);
 
-       return fieldRepository.save(field);
+        fieldRepository.save(fieldMapper.returnField(fieldDto));
+
+       return fieldDto;
 
     }
 
-    public List<Field> getAllFields() {
-        return fieldRepository.findAll().stream()
+    public List<FieldDto> getAllFields() {
+       List<Field>  fields= fieldRepository.findAll().stream()
                 .collect(Collectors.toList());
 
+       List<FieldDto>fieldDtos=new ArrayList<>();
+       for(Field field:fields){
+
+           fieldDtos.add(fieldMapper.returnFieldDto(field));
+
+       }
+
+       return fieldDtos;
+
     }
 
-    public Field getFieldById(Long id) {
-        return fieldRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Field not found"));
+    public FieldDto getFieldById(Long id) {
+
+
+        Field field=fieldRepository.findById(id)
+                .orElseThrow(()->new EntityNotFoundException(" Field not found"));
+
+        return fieldMapper.returnFieldDto(field);
+
     }
 
-    public Field updateField(Field field) {
-        Field existingField = fieldRepository.findById(field.getId())
+    public FieldDto updateField(FieldDto fieldDto) {
+        Field existingField = fieldRepository.getFieldByFieldName(fieldDto.getFieldName())
                 .orElseThrow(() -> new EntityNotFoundException("Field not found"));
 
-        fieldValidator.validate(field);
+        fieldValidator.validate(fieldDto);
 
 
 
-        existingField.setFieldName(field.getFieldName());
-        existingField.setDescription(field.getDescription());
+        existingField.setFieldName(fieldDto.getFieldName());
+        existingField.setDescription(fieldDto.getDescription());
+        fieldRepository.save(existingField);
 
-        return fieldRepository.save(existingField);
+        return fieldDto ;
     }
 
     public String deleteField(Long id) {

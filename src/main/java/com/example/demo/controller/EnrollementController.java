@@ -57,13 +57,13 @@ public class EnrollementController {
     }
 
     @PostMapping("/createNewEnrollement")
-    public ResponseEntity <EnrollementDto> createNewEnrollement(@RequestBody EnrollementDto enrollementDto) {
+    public ResponseEntity <EnrollementDto> EnrollInFormation(@RequestBody EnrollementDto enrollementDto) {
 
         return new ResponseEntity<>(enrollementService.createNewEnrollement(enrollementDto),HttpStatus.CREATED) ;
 
     }
     @PostMapping("/EnrollInFormation/{formation_name}")
-    public ResponseEntity <EnrollementDto> createNewEnrollement(Principal connectedUser,@PathVariable String formation_name) {
+    public ResponseEntity <EnrollementDto> EnrollInFormation(Principal connectedUser, @PathVariable String formation_name) {
 
         return new ResponseEntity<>(enrollementService.EnrollInFormation(connectedUser,formation_name),HttpStatus.CREATED) ;
 
