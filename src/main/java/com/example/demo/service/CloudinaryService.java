@@ -3,6 +3,7 @@ package com.example.demo.service;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import lombok.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,14 +19,18 @@ import java.util.Objects;
 public class CloudinaryService {
     Cloudinary cloudinary;
 
-    public CloudinaryService() {
+
+    public CloudinaryService( @org.springframework.beans.factory.annotation.Value("${cloudinary.cloud-name}") String cloudName,
+                              @org.springframework.beans.factory.annotation.Value("${cloudinary.api-key}") String apiKey,
+                              @org.springframework.beans.factory.annotation.Value("${cloudinary.api-secret}") String apiSecret) {
+
+
         Map<String, String> valuesMap = new HashMap<>();
-        valuesMap.put("cloud_name", "dtpgkspal");
-        valuesMap.put("api_key", "454732342277198");
-        valuesMap.put("api_secret", "gu0F9fVraknEkV6lDYVsOt9eAGg");
+        valuesMap.put("cloud_name", cloudName);
+        valuesMap.put("api_key", apiKey);
+        valuesMap.put("api_secret", apiSecret);
         cloudinary = new Cloudinary(valuesMap);
     }
-
 
     public Map upload(MultipartFile multipartFile) throws IOException {
         File file = convert(multipartFile);
