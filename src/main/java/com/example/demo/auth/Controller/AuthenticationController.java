@@ -2,11 +2,15 @@ package com.example.demo.auth.Controller;
 
 import com.example.demo.auth.Dto.*;
 import com.example.demo.auth.Service.AuthenticationService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -59,6 +63,15 @@ return ResponseEntity.ok(service.registerManager(request)) ;
 
 
 
+    @PostMapping("/refresh-token")
+    public AuthenticationResponse refreshToken(HttpServletRequest request,
+                                               HttpServletResponse response) throws IOException {
+
+
+        return service.refreshToken(request,response) ;
+
+
+    }
 
 
 }
