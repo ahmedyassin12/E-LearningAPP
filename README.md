@@ -20,7 +20,7 @@ A **production-style backend system** for a coding school where students enroll 
 
 - 🔐 Stateless authentication using **JWT access + refresh token rotation**
 - 📧 **Email verification flow** before account activation (Brevo SMTP relay)
-- ⚡ **Distributed Redis caching** for JWT blacklisting, formations, and courses
+- ⚡ Redis Performance Layer — Distributed caching for formations and courses with optimized eviction-based JWT validation (7-day Token TTL) to ensure           database-backed security.
 - ⏱️ **Automated subscription access control** via scheduled jobs
 - 🧠 Clean layered architecture — DTOs, validators, global exception handling
 - ☁️ Media management with **Cloudinary integration**
@@ -34,41 +34,43 @@ A **production-style backend system** for a coding school where students enroll 
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                        Client (Postman / Frontend)               │
+│                   Client (Postman / Frontend)                   │
 └───────────────────────────────┬─────────────────────────────────┘
-                                │ HTTP
+                                │ HTTP (JWT in Header)
 ┌───────────────────────────────▼─────────────────────────────────┐
-│                    Controller Layer (@RestController)            │
-│              Handles HTTP requests, delegates to services        │
+│              Security Filter (OncePerRequestFilter)             │
+│   Validates JWT: (1. Check Cache -> 2. If Miss, Check DB)   │
 └───────────────────────────────┬─────────────────────────────────┘
                                 │
 ┌───────────────────────────────▼─────────────────────────────────┐
-│                     Service Layer (@Service)                     │
-│         Business logic, caching, scheduling, validation          │
+│                  Service Layer (@Service)                       │
+│      Business logic, @Cacheable, Token Revocation Logic         │
 └──────────────┬──────────────────────────────┬───────────────────┘
                │                              │
 ┌──────────────▼──────────┐      ┌────────────▼──────────────────┐
-│  Repository Layer (JPA) │      │      Redis Cache Layer         │
-│  PostgreSQL via Hibernate│      │  JWT tokens, formations,      │
-│                         │      │  courses (Upstash in prod)     │
+│  Repository Layer (JPA) │      │      Redis Cache Layer        │
+│  PostgreSQL via Hibernate◄─────┤   Eviction-Based Invalidation │
+│ (Token,Formation,Courses)│     │   Formation/Course/Tokens(Performance)    │
+└──────────────┬──────────┘      └────────────┬──────────────────┘
+               │                              │ 
+┌──────────────▼──────────┐      ┌────────────▼──────────────────┐
+│   PostgreSQL Database   │      │        Redis Server 
+│                                  (If Cache Miss: Fetch & Sync)
+│  The "Source of Truth"  │      │   (Performance Accelerator)   │
 └─────────────────────────┘      └───────────────────────────────┘
-               │
-┌──────────────▼──────────┐
-│     PostgreSQL Database  │
-│   Users, Formations,     │
-│   Enrollments, Payments  │
-└─────────────────────────┘
 ```
 
 ### Layer Responsibilities
 
-**Controller Layer** — Receives HTTP requests, validates input via `@Valid`, delegates to services, returns structured responses.
+**Controller Layer** — Receives HTTP requests, delegates to services, returns structured responses.
 
-**Service Layer** — Contains all business logic: enrollment rules, payment validation, scheduled access control, cache management, and email dispatch.
+**Service Layer** — Contains all business logic: enrollment rules, payment validation, scheduled access control, cache management, and email dispatch,
+                    also it implements a high-granularity validation strategy using a custom ObjectValidator<T> (wrapping Jakarta Bean Validation) to                          collect and return all constraint violations simultaneously for a better consumer experience.
 
 **Repository Layer** — Spring Data JPA repositories with custom JPQL queries for complex filtering and role-based data access.
 
-**Security Layer** — JWT filter chain with `OncePerRequestFilter`, role-based access (`MANAGER`, `STUDENT`, `FORMATEUR`), and Database-backed blacklist + Redis as a cache layer.
+
+**Security Layer** — Implements a Durable-First validation flow via OncePerRequestFilter. The system treats PostgreSQL as the absolute Source of Truth for token validity, ensuring maximum consistency. Redis acts as a distributed Performance Accelerator, caching validated sessions to provide sub-millisecond authentication. Any security state change (Logout, new Auth, or Refresh) triggers an immediate Cache Eviction, forcing the next request to re-verify against the persistent database to prevent "ghost sessions..
 
 **Cache Layer** — Redis-backed distributed cache replacing in-memory Ehcache, enabling cache sharing across instances and persistence across restarts.
 
@@ -158,12 +160,18 @@ This simulates a real-world **subscription-based content access system** — sim
 
 ## 🔐 Security
 
-- Stateless JWT authentication with **access token + refresh token rotation**
-- Role-based authorization: `MANAGER`, `STUDENT`, `FORMATEUR`
-- Database-backed blacklist + Redis as a cache layer — invalidated tokens rejected even before expiry
-- `OncePerRequestFilter` intercepts all requests for token validation
-- Email verification required after Account registration action
-- Passwords validated with custom `@StrongPassword` annotation
+🔐 Stateless JWT: Access token (2 min) + Refresh token rotation.
+
+🛡️ Zero-Trust Validation: PostgreSQL acts as the absolute Source of Truth for token status; OncePerRequestFilter validates every request.
+
+⚡ Cache-Aside Acceleration: Valid sessions are cached in Redis to minimize DB overhead.
+
+❌ Security via Eviction: Logout, Auth, or Refresh events trigger immediate cache eviction, forcing a re-verification against the persistent DB.
+
+📧 Account Integrity: - Email verification required after Account registration action.
+
+🛡️ Role-Based Access Control (RBAC): Strict permission scoping for MANAGER, STUDENT, and FORMATEUR roles using Spring Security's
+    method-level protection.
 
 ---
 
@@ -214,7 +222,7 @@ mvn test
 | **Spring Security + JWT** | Authentication & authorization |
 | **Spring Data JPA (Hibernate)** | ORM & database access |
 | **PostgreSQL 15** | Relational database |
-| **Redis 7 (Upstash)** | Distributed caching & JWT blacklisting |
+| **Redis 7 (Upstash)** | Distributed caching  |
 | **Docker & Docker Compose** | Containerized local environment |
 | **Cloudinary** | Media file storage (images, videos, PDFs) |
 | **Brevo (SMTP relay)** | Transactional email delivery |
@@ -229,7 +237,7 @@ mvn test
 Ehcache is in-memory and instance-bound — it cannot be shared across multiple app instances and is lost on restart. Redis is an external distributed cache that persists across restarts and scales horizontally. For a production system this is non-negotiable.
 
 **Why JWT over Sessions?**
-Stateless JWT authentication scales horizontally without shared session storage. Each request is self-contained — no session lookup required. Combined with Redis token blacklisting, we get the security benefits of session invalidation without the statefulness.
+Stateless JWT authentication scales horizontally without the need for shared session storage. Each request is self-contained, eliminating the need for traditional server-side session lookups. By combining this with Database-backed Token Validation and Redis/Ehcache eviction, we achieve the security benefits of immediate session invalidation—effectively "killing" tokens on demand—without sacrificing the scalability of a stateless architecture.
 
 **Why Brevo over Gmail SMTP in production?**
 Render's infrastructure blocks outbound SMTP ports 587 and 465 to prevent spam abuse. Brevo is a dedicated transactional email relay that operates over unrestricted ports. Gmail SMTP is kept for local development only.
@@ -247,6 +255,25 @@ Spring's `@Valid` fails on the first constraint violation. The custom validator 
 
 ## ⚙️ Setup & Run
 
+### 🔑 Environment Variables
+
+```properties
+
+# --- Application Profiles ---
+# Options: Local, Prod
+SPRING_PROFILES_ACTIVE=Local
+
+# --- Email Service (Brevo/SMTP) ---
+BREVO_USERNAME=your_brevo_username
+BREVO_PASSWORD=your_brevo_password
+BREVO_SENDER=your_email@gmail.com
+
+# --- Cloudinary (Media Storage) ---
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_cloud_key
+CLOUDINARY_API_SECRET=your_cloud_secret
+---
+
 ### 🐳 Docker (Recommended)
 
 ```bash
@@ -256,7 +283,7 @@ docker-compose up --build
 ```
 
 This starts:
-- Spring Boot API on `http://localhost:8080`
+- Spring Boot API on `http://localhost:8088`
 - PostgreSQL on port `5432`
 - Redis on port `6379`
 
@@ -271,40 +298,8 @@ mvn spring-boot:run
 
 ---
 
-## 🔑 Environment Variables
 
-```properties
-# Database
-SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/centre_Formation
-DB_POSTGRESDB_USER=postgres
-DB_POSTGRESDB_PASSWORD=your_password
-spring.sql.init.platform=postgresql
-spring.jpa.hibernate.ddl-auto=update
-spring.jpa.open-in-view=true
-#redis
-spring.data.redis.host=localhost
-spring.data.redis.port=6379
-spring.cache.type=redis
 
-# Email 
-spring.mail.protocol=smtp
-spring.mail.host=smtp-relay.brevo.com
-spring.mail.port=587
-spring.mail.properties.mail.smtp.auth=true
-spring.mail.properties.mail.smtp.starttls.enable=true
-spring.mail.properties.mail.smtp.connectiontimeout=10000
-spring.mail.properties.mail.smtp.from={put your email here}
-spring.mail.properties.mail.smtp.timeout=10000  
-spring.mail.properties.mail.smtp.writetimeout=10000
-# Cloudinary
-add environment variables in CloudinaryService class "package com.example.demo.service.CloudinaryService"
-
-# Redis (Upstash - production)
-#redis
-spring.data.redis.host=localhost
-spring.data.redis.port=6379
-spring.cache.type=redis
-```
 
 > ⚠️ Never commit secrets. Use `.env` files locally and platform environment variables in production.
 
