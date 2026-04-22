@@ -8,6 +8,12 @@ import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.servers.Server;
+import io.swagger.v3.oas.models.OpenAPI;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
 
 @OpenAPIDefinition(
 
@@ -22,19 +28,8 @@ import io.swagger.v3.oas.annotations.servers.Server;
                 title = "openApi specification - trao"
         ),
 
-        servers = {
-                @Server(
 
-                        description = "Render + neuon ENV",
-                        url="https://e-learningapp-5dxn.onrender.com"
-
-                        //https://e-learningapp-5dxn.onrender.com/swagger-ui/index.html
-                        //https://ehcacheproject.onrender.com
-                )
-
-
-        }
-        ,  security ={
+          security ={
 
         @SecurityRequirement(
                 name = "bearerAuth"
@@ -54,5 +49,19 @@ import io.swagger.v3.oas.annotations.servers.Server;
 
 
 )
+@Configuration
 public class OpenApiConfig {
+    @Bean
+    public OpenAPI customOpenAPI(@Value("${app.server.url}") String serverUrl) {
+
+        return new OpenAPI()
+                .servers(List.of(
+                        new io.swagger.v3.oas.models.servers.Server()
+                                .url(serverUrl)
+                                .description("Current Environment")
+
+                ));
+    }
+
+
 }

@@ -19,7 +19,6 @@ public class VerificationEmailController {
 
     private final VerificationTokenRepository tokenRepository;
     private final UserDAO userDao;
-    private final VerificationTokenRepository verificationTokenRepository;
     @Autowired
     private final PasswordEncoder passwordEncoder;
 
@@ -32,12 +31,7 @@ public class VerificationEmailController {
         return "Email verified successfully! 🎉 Now you can login.";
     }
 
-    @GetMapping("/reset-password")
-    public ResponseEntity<String> validateResetToken(@RequestParam("token") String token) {
-        getValidTokenOrThrow(token);
 
-        return ResponseEntity.ok(token);
-    }
 
 
     private VerificationToken getValidTokenOrThrow(String token) {

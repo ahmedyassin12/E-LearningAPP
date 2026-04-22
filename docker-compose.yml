@@ -30,7 +30,7 @@
         retries: 5
     spring-boot-app:
       container_name: e-learningApp
-      image: e-learning/app  # custome java image
+      build: . # build from docker file
       ports:
         - "8088:8080"  # Mapping host port 8088 to container port 8080
       volumes:

@@ -10,6 +10,6 @@ WORKDIR /app
 
 COPY --from=builder /app/target/*.jar ELearningApp.jar
 
-EXPOSE 9090
+EXPOSE 8080
 
 CMD ["java", "-jar", "ELearningApp.jar"]
