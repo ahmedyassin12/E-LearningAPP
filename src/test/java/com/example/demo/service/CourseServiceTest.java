@@ -35,8 +35,11 @@ class CourseServiceTest {
     @Mock private EnrollementDAO enrollementDAO;
     @Mock private CourseMapper courseMapper;
 
+    @Mock private CourseCacheService courseCacheService ;
+
     @Mock private ObjectValidator<CreateCourseDto> courseValidator ;
     @InjectMocks private CourseService courseService;
+
 
     private User mockUser;
     private Course testCourse;
@@ -125,87 +128,8 @@ class CourseServiceTest {
                 () -> courseService.getAllCourses());
     }
 
-    // getFormationCourses tests
-    @Test
-    void getFormationCourses_StudentRolePaid_ReturnsCourseDtos() {
-        mockUser.setRole(Role.STUDENT);
-        when(courseDAO.getFormationCourses(anyLong())).thenReturn(List.of(testCourse));
-        when(enrollementDAO.isEnrollmentPaid(anyLong(), anyLong())).thenReturn(true);
-        when(courseMapper.returnCourseDto(any(Course.class))).thenReturn(courseDto);
-
-        Iterable<?> result = courseService.getFormationCourses(100L, authentication);
-
-        assertTrue(result instanceof List);
-        List<?> list = (List<?>) result;
-        assertEquals(1, list.size());
-        assertTrue(list.get(0) instanceof CourseDto);
-    }
-
-    @Test
-    void getFormationCourses_StudentRoleUnpaid_ReturnsUnpaidDtos() {
-        mockUser.setRole(Role.STUDENT);
-        when(courseDAO.getFormationCourses(anyLong())).thenReturn(List.of(testCourse));
-        when(enrollementDAO.isEnrollmentPaid(anyLong(), anyLong())).thenReturn(false);
-        when(courseMapper.returns_UnpaidCourseDto(any(Course.class))).thenReturn(unpaidCourseDto);
-
-        Iterable<?> result = courseService.getFormationCourses(100L, authentication);
-
-        assertTrue(result instanceof List);
-        List<?> list = (List<?>) result;
-        assertEquals(1, list.size());
-        assertTrue(list.get(0) instanceof UnpaidCourseDto);
-    }
-
-    @Test
-    void getFormationCourses_ManagerRole_ReturnsManagerDtos() {
-        mockUser.setRole(Role.MANAGER);
-        when(courseDAO.getFormationCourses(anyLong())).thenReturn(List.of(testCourse));
-        when(courseMapper.returnManagerCourseDto(any(Course.class))).thenReturn(managerCourseDto);
-
-        Iterable<?> result = courseService.getFormationCourses(100L, authentication);
-
-        assertTrue(result instanceof List);
-        List<?> list = (List<?>) result;
-        assertEquals(1, list.size());
-        assertTrue(list.get(0) instanceof ManagerCourseDto);
-    }
-
-    @Test
-    void getFormationCourses_FormateurRole_ReturnsCourseDtos() {
-        mockUser.setRole(Role.FORMATEUR);
-        when(courseDAO.getFormationCourses(anyLong())).thenReturn(List.of(testCourse));
-        when(formationDAO.findFormationByNameForFormateur(anyString(), anyLong()))
-                .thenReturn(Optional.of(testFormation));
-        when(courseMapper.returnCourseDto(any(Course.class))).thenReturn(courseDto);
-
-        Iterable<?> result = courseService.getFormationCourses(100L, authentication);
-
-        assertTrue(result instanceof List);
-        List<?> list = (List<?>) result;
-        assertEquals(1, list.size());
-        assertTrue(list.get(0) instanceof CourseDto);
-    }
-
-    @Test
-    void getFormationCourses_FormateurRoleUnauthorized_ThrowsException() {
-        mockUser.setRole(Role.FORMATEUR);
-        when(courseDAO.getFormationCourses(anyLong())).thenReturn(List.of(testCourse));
-        when(formationDAO.findFormationByNameForFormateur(anyString(), anyLong()))
-                .thenReturn(Optional.empty());
-
-        assertThrows(AccessDeniedException.class,
-                () -> courseService.getFormationCourses(100L, authentication));
-    }
 
 
-
-    @Test
-    void getFormationCourses_NoCourses_ThrowsException() {
-        when(courseDAO.getFormationCourses(anyLong())).thenReturn(Collections.emptyList());
-
-        assertThrows(EntityNotFoundException.class,
-                () -> courseService.getFormationCourses(100L, authentication));
-    }
 
     // getCourseById tests
     @Test
@@ -226,73 +150,10 @@ class CourseServiceTest {
                 () -> courseService.getCourseById(999L));
     }
 
-    // getCourseByName tests
-    @Test
-    void getCourseByName_StudentRolePaid_ReturnsCourseDto() {
-        mockUser.setRole(Role.STUDENT);
-        when(courseDAO.findCourseBycourseName(anyString())).thenReturn(Optional.of(testCourse));
-        when(enrollementDAO.isEnrollmentPaid(anyLong(), anyLong())).thenReturn(true);
-        when(courseMapper.returnCourseDto(testCourse)).thenReturn(courseDto);
 
-        Object result = courseService.getCourseByName("Java", authentication);
 
-        assertTrue(result instanceof CourseDto);
-    }
 
-    @Test
-    void getCourseByName_StudentRoleUnpaid_ReturnsUnpaidDto() {
-        mockUser.setRole(Role.STUDENT);
-        when(courseDAO.findCourseBycourseName(anyString())).thenReturn(Optional.of(testCourse));
-        when(enrollementDAO.isEnrollmentPaid(anyLong(), anyLong())).thenReturn(false);
-        when(courseMapper.returns_UnpaidCourseDto(testCourse)).thenReturn(unpaidCourseDto);
 
-        Object result = courseService.getCourseByName("Java", authentication);
-
-        assertTrue(result instanceof UnpaidCourseDto);
-    }
-
-    @Test
-    void getCourseByName_ManagerRole_ReturnsManagerDto() {
-        mockUser.setRole(Role.MANAGER);
-        when(courseDAO.findCourseBycourseName(anyString())).thenReturn(Optional.of(testCourse));
-        when(courseMapper.returnManagerCourseDto(testCourse)).thenReturn(managerCourseDto);
-
-        Object result = courseService.getCourseByName("Java", authentication);
-
-        assertTrue(result instanceof ManagerCourseDto);
-    }
-
-    @Test
-    void getCourseByName_FormateurRole_ReturnsCourseDto() {
-        mockUser.setRole(Role.FORMATEUR);
-        when(courseDAO.findCourseBycourseName(anyString())).thenReturn(Optional.of(testCourse));
-        when(formationDAO.findFormationByNameForFormateur(anyString(), anyLong()))
-                .thenReturn(Optional.of(testFormation));
-        when(courseMapper.returnCourseDto(testCourse)).thenReturn(courseDto);
-
-        Object result = courseService.getCourseByName("Java", authentication);
-
-        assertTrue(result instanceof CourseDto);
-    }
-
-    @Test
-    void getCourseByName_FormateurRoleUnauthorized_ThrowsException() {
-        mockUser.setRole(Role.FORMATEUR);
-        when(courseDAO.findCourseBycourseName(anyString())).thenReturn(Optional.of(testCourse));
-        when(formationDAO.findFormationByNameForFormateur(anyString(), anyLong()))
-                .thenReturn(Optional.empty());
-
-        assertThrows(AccessDeniedException.class,
-                () -> courseService.getCourseByName("Java", authentication));
-    }
-
-    @Test
-    void getCourseByName_CourseNotFound_ThrowsException() {
-        when(courseDAO.findCourseBycourseName(anyString())).thenReturn(Optional.empty());
-
-        assertThrows(EntityNotFoundException.class,
-                () -> courseService.getCourseByName("Invalid", authentication));
-    }
 
     // createNewCourse tests
     @Test

@@ -6,15 +6,18 @@ import lombok.*;
 import java.util.Set;
 
 @Builder
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 @Entity
+@Getter
+@Setter
+@ToString(exclude = {"formateurs"}) // Safety for logging
+@EqualsAndHashCode(onlyExplicitlyIncluded = true) // Safety for Sets/Maps
 public class Skill {
 
     @Id
     @GeneratedValue
+    @EqualsAndHashCode.Include
     private Long id;
 
     @Column(unique = true,nullable = false)

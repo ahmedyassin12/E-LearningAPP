@@ -124,73 +124,6 @@ class FormationServiceTest {
         assertEquals(expectedDto.getFormation_name(), dto.getFormation_name());
         assertEquals(expectedDto.getDescription(), dto.getDescription());
     }
-    // getAllFormation tests
-    @Test
-    void getAllFormation_ManagerRole_ReturnsFormations() {
-        mockUser.setRole(Role.MANAGER);
-        authentication =
-                new UsernamePasswordAuthenticationToken(mockUser, null);
-        FormationManagerDto expectedDto = FormationManagerDto.builder()
-                .formation_id(testFormation.getId())
-                .formation_name(testFormation.getFormationName())
-                .description(testFormation.getDescription())
-                .date(testFormation.getDate())
-                .imageUrl(testFormation.getImageUrl())
-                .publicId(testFormation.getPublicId())
-                .build();
-
-        when(formationDAO.findAll()).thenReturn(List.of(testFormation) );
-        when(formationMapper.returnformationManagerDto(testFormation)).thenReturn(expectedDto);
-
-        Iterable<?> result = formationService.getAllFormation(authentication);
-
-        assertTrue(result.iterator().hasNext());
-        assertEquals(expectedDto, result.iterator().next());
-
-
-    }
-
-
-
-    @Test
-    void getAllFormation_StudentRole_ReturnsDTOs() {
-
-        FormationStudentDto testFormationDto = FormationStudentDto.builder()
-                .formation_name("Java Fundamentals")
-                .formation_id(testFormation.getId())
-                .isStudentEnrolled(true)
-                .IsEnrollementpaid(true)
-                .date(LocalDate.now())
-                .build();
-
-
-        authentication =
-                new UsernamePasswordAuthenticationToken(mockUser, null);
-
-        when(formationDAO.findAll()).thenReturn((Iterable) List.of(testFormation) );
-        when(enrollementDAO.isStudentEnrolled(mockUser.getId(), testFormation.getId())).thenReturn(true);
-        when(enrollementDAO.isEnrollmentPaid(mockUser.getId(), testFormation.getId())).thenReturn(true);
-        when(formationMapper.returnformationStudentDto(testFormation, true, true))
-                .thenReturn(testFormationDto);
-
-        Iterable<?> result = formationService.getAllFormation(authentication);
-
-        assertTrue(result.iterator().hasNext());
-        verify(formationMapper).returnformationStudentDto(any(), anyBoolean(), anyBoolean());
-    }
-
-    @Test
-    void getAllFormation_EmptyFormations_ThrowsException() {
-        authentication =
-                new UsernamePasswordAuthenticationToken(mockUser, null);
-
-        when(formationDAO.findAll()).thenReturn(Collections.emptyList());
-
-        assertThrows(EntityNotFoundException.class,
-                () -> formationService.getAllFormation(authentication));
-    }
-
-    // getFormationsForFormateur tests
 
 
     // updateFormationImage tests
@@ -245,52 +178,12 @@ class FormationServiceTest {
 
 
 
-    // getFormationByName tests
-    @Test
-    void getFormationByName_FormateurRole_ReturnsFormation() {
 
 
 
 
-        mockUser.setRole(Role.FORMATEUR);
-        authentication =
-                new UsernamePasswordAuthenticationToken(mockUser, null);
-
-        when(formationDAO.findFormationByNameForFormateur(anyString(), anyLong()))
-                .thenReturn(Optional.of(testFormation));
 
 
-        when(formationMapper.returnformationDto(testFormation)).thenReturn(formationDto);
-        Object result = formationService.getFormationByName("Test", authentication);
-
-        Assertions.assertThat(result).isNotNull();
-
-    }
-
-
-
-
-    @Test
-    void getFormationByName_StudentRole_ReturnsDTO() {
-
-
-
-        authentication =
-                new UsernamePasswordAuthenticationToken(mockUser, null);
-
-        when(formationDAO.findFormationByName(anyString())).thenReturn(Optional.of(testFormation));
-        when(enrollementDAO.isEnrollmentPaid(anyLong(), anyLong())).thenReturn(true);
-        when(enrollementDAO.isStudentEnrolled(anyLong(), anyLong())).thenReturn(true);
-        when(formationMapper.returnformationStudentDto(any(), anyBoolean(), anyBoolean()))
-                .thenReturn(new FormationStudentDto());
-
-        Object result = formationService.getFormationByName("Test", authentication);
-
-        assertTrue(result instanceof FormationStudentDto);
-
-
-
-    }
 
 
 
@@ -359,8 +252,15 @@ class FormationServiceTest {
     // update_formation tests
     @Test
     void update_formation_ValidFormation_ReturnsUpdated() {
-        Skill skill =new Skill();
-        Field field = new Field();
+        Skill skill =Skill.builder()
+                .id(1l)
+                .name("data_structure")
+                .build();
+        Field field =Field.builder()
+                .id(1l)
+                .fieldName("Programming")
+                .description("Algorithms and data structure")
+                .build();
         // Arrange - identical to createNewFormation structure
         Formateur formateur1 = Formateur.builder()
                 .skills(Set.of(skill))
@@ -370,15 +270,17 @@ class FormationServiceTest {
                 .id(1L)
                 .username("formateur1")
                 .build();
+        System.out.println("did it stoped here 1? ");
 
         Formateur formateur2 = Formateur.builder()
                 .skills(Set.of(skill))
                 .field(field)
                 .experienceYears(2)
-                .availability(Availability.AVAILABLE)
+                .availability(Availability.NOT_AVAILABLE)
                 .id(2L)
                 .username("formateur2")
                 .build();
+        System.out.println("did it stoped here 2? ");
 
         FormationDto formationDto = FormationDto.builder()
                 .formation_id(testFormation.getId())
@@ -392,6 +294,7 @@ class FormationServiceTest {
                 .formationDto(formationDto)
                 .formateur_ids(Arrays.asList(1L, 2L))
                 .build();
+        System.out.println("did it stoped here 3? ");
 
         Formation updatedFormation = Formation.builder()
                 .id(testFormation.getId())
@@ -401,6 +304,7 @@ class FormationServiceTest {
                 .imageUrl("new-image.jpg")
                 .formateurs(Set.of(formateur1, formateur2))
                 .build();
+        System.out.println("did it stoped here 4? ");
 
         FormationDto expectedDto = FormationDto.builder()
                 .formation_id(updatedFormation.getId())

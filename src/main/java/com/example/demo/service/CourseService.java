@@ -40,8 +40,7 @@ public class CourseService {
     @Autowired
     private FormationDAO formationDAO ;
 
-    @Autowired
-    EnrollementDAO enrollementDAO ;
+
 
     @Autowired
 private ObjectValidator<CreateCourseDto> courseValidator ;

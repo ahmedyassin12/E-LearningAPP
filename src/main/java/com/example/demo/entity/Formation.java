@@ -7,17 +7,20 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 @Builder
 @Entity
+@Getter
+@Setter
+@ToString(exclude = {"enrollements", "courses","formateurs"}) // Safety for logging
+@EqualsAndHashCode(onlyExplicitlyIncluded = true) // Safety for Sets/Maps
 public class Formation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
+    @EqualsAndHashCode.Include
     private Long id;
 
     @Column(name = "FormationName",unique = true,nullable = false)

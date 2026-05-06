@@ -7,10 +7,7 @@
     import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
     import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
     import jakarta.persistence.*;
-    import lombok.AllArgsConstructor;
-    import lombok.Data;
-    import lombok.NoArgsConstructor;
-    import lombok.ToString;
+    import lombok.*;
     import lombok.experimental.SuperBuilder;
     import org.springframework.security.core.GrantedAuthority;
     import org.springframework.security.core.userdetails.UserDetails;
@@ -35,7 +32,9 @@
 
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
-            private Long id ;
+        @EqualsAndHashCode.Include
+
+        private Long id ;
 
 
         @Column(name="email",nullable = false)

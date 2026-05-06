@@ -7,7 +7,6 @@ import lombok.experimental.SuperBuilder;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 @Entity
 @SuperBuilder
 @DiscriminatorValue("STUDENT")

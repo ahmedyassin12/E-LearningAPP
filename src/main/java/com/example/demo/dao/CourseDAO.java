@@ -31,10 +31,7 @@ public interface CourseDAO extends CrudRepository<Course,Long> {
 
 
 
-    @Query("SELECT c FROM Course c " +
-            "JOIN c.formation f " +
-            "JOIN Enrollement e ON e.formation.id = f.id " +
-            "WHERE e.formation.id = :formation_id")
+    @Query("SELECT c FROM Course c WHERE c.formation.id = :formation_id")
     public Iterable<Course> getFormationCourses(@Param("formation_id") Long formation_id);
 
 

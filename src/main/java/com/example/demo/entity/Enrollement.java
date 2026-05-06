@@ -9,11 +9,13 @@
     import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
     @Entity
-    @Data
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    @ToString
+    @Getter
+    @Setter
+    @ToString(exclude = {"payment"}) // Safety for logging
+    @EqualsAndHashCode(onlyExplicitlyIncluded = true) // Safety for Sets/Maps
     @Table(uniqueConstraints = {
             @UniqueConstraint(columnNames = {"student_id", "formation_id"}),
     })

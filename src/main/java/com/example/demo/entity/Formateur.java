@@ -2,23 +2,25 @@ package com.example.demo.entity;
 import com.example.demo.entity.Enums.Availability;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import java.util.HashSet;
 import java.util.Set;
 
 
 
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 @Entity
 @SuperBuilder
-@DiscriminatorValue("Trainer")
+@DiscriminatorValue("Formateur")
+@Getter
+@Setter
+@ToString(exclude = {"events", "skills","formations"}) // Safety for logging
+
+@EqualsAndHashCode(callSuper = true, onlyExplicitlyIncluded = true) // Look at parent, but only explicit fields
+
+
 public class Formateur extends User {
 
 
