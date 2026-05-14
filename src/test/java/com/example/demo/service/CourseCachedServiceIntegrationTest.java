@@ -10,6 +10,7 @@ import com.example.demo.entity.Enums.Availability;
 import com.example.demo.entity.Enums.PaymentStatus;
 import com.example.demo.entity.Enums.Role;
 import com.example.demo.mapper.CourseMapper;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.constraints.AssertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +20,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.cache.CacheManager;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -31,8 +33,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -67,6 +68,7 @@ public class CourseCachedServiceIntegrationTest {
     private CourseCacheService courseCacheService;
 
     private Student student;
+    private User manager;
     private Course testCourse;
     private Formation testFormation;
     private Enrollement enrollement;
@@ -112,6 +114,18 @@ private Formateur formateur1;
                 .build();
         userDAO.save(formateur1);
 
+        manager=User.builder()
+                .id(1L)
+                .firstName("Hela")
+                .lastName("Zfuba")
+                .dateNaissance(LocalDate.parse("1975-02-20"))
+                .username("Helahaloula")
+                .password("T9x!qP4@vZ7#fLba1")
+                .email("jijo123@gmail.com")
+                .role(Role.MANAGER)
+                .phoneNumber("25011360")
+                .enabled(true)
+                .build();
         testFormation = Formation.builder()
                 .date(LocalDate.now())
                 .formateurs(Set.of(formateur1))
@@ -231,97 +245,107 @@ private Formateur formateur1;
 
         }
 
-
-        /*
-           Next tests to add + continue Caching tests for evict and put :
-
     @Test
     void getFormationCourses_ManagerRole_ReturnsManagerDtos() {
-        mockUser.setRole(Role.MANAGER);
-        when(courseDAO.getFormationCourses(anyLong())).thenReturn(List.of(testCourse));
-        when(courseMapper.returnManagerCourseDto(any(Course.class))).thenReturn(managerCourseDto);
+        Long formationId = testFormation.getId();
 
-        Iterable<?> result = courseService.getFormationCourses(100L, authentication);
+        Iterable<?> result = courseCacheService.getCachedFormationCourses(manager,formationId );
 
         assertTrue(result instanceof List);
         List<?> list = (List<?>) result;
         assertEquals(1, list.size());
         assertTrue(list.get(0) instanceof ManagerCourseDto);
     }
-
     @Test
     void getFormationCourses_FormateurRole_ReturnsCourseDtos() {
-        mockUser.setRole(Role.FORMATEUR);
-        when(courseDAO.getFormationCourses(anyLong())).thenReturn(List.of(testCourse));
-        when(formationDAO.findFormationByNameForFormateur(anyString(), anyLong()))
-                .thenReturn(Optional.of(testFormation));
-        when(courseMapper.returnCourseDto(any(Course.class))).thenReturn(courseDto);
 
-        Iterable<?> result = courseService.getFormationCourses(100L, authentication);
+        Long formationId= testFormation.getId();
+        Iterable<?> result = courseCacheService.getCachedFormationCourses(formateur1,formationId);
 
         assertTrue(result instanceof List);
         List<?> list = (List<?>) result;
         assertEquals(1, list.size());
         assertTrue(list.get(0) instanceof CourseDto);
+
     }
+
 
     @Test
     void getFormationCourses_FormateurRoleUnauthorized_ThrowsException() {
-        mockUser.setRole(Role.FORMATEUR);
-        when(courseDAO.getFormationCourses(anyLong())).thenReturn(List.of(testCourse));
-        when(formationDAO.findFormationByNameForFormateur(anyString(), anyLong()))
-                .thenReturn(Optional.empty());
+       Formateur formateur2 = Formateur.builder()
+                .firstName("form2")
+                .lastName("kiko2")
+                .dateNaissance(LocalDate.parse("2003-02-20"))
+                .username("Formateur2op")
+                .password("T9x!qP4@vZ7#fLba1a")
+                .email("formateur1@gmail.com")
+                .availability(Availability.AVAILABLE)
+                .role(Role.FORMATEUR)
+                .phoneNumber("55020147")
+                .enabled(true)
+                .build();
+        userDAO.save(formateur1);
 
+        Long formationId=testFormation.getId();
         assertThrows(AccessDeniedException.class,
-                () -> courseService.getFormationCourses(100L, authentication));
+                () -> courseCacheService.getCachedFormationCourses(formateur2, formationId));
+
+
+
+
+
+
     }
-
-
 
     @Test
     void getFormationCourses_NoCourses_ThrowsException() {
-        when(courseDAO.getFormationCourses(anyLong())).thenReturn(Collections.emptyList());
 
-        assertThrows(EntityNotFoundException.class,
-                () -> courseService.getFormationCourses(100L, authentication));
+        Long formationId=testFormation.getId();
+        courseDAO.delete(testCourse);
+      assertThrows(EntityNotFoundException.class,()->
+              courseCacheService.getCachedFormationCourses(student, formationId))  ;
+
+
+
     }
-
-   // getCourseByName tests
     @Test
     void getCourseByName_StudentRolePaid_ReturnsCourseDto() {
-        mockUser.setRole(Role.STUDENT);
-        when(courseDAO.findCourseBycourseName(anyString())).thenReturn(Optional.of(testCourse));
-        when(enrollementDAO.isEnrollmentPaid(anyLong(), anyLong())).thenReturn(true);
-        when(courseMapper.returnCourseDto(testCourse)).thenReturn(courseDto);
 
-        Object result = courseService.getCourseByName("Java", authentication);
+
+        Object result = courseCacheService.getCachedCourse(student,testCourse.getCourseName() );
 
         assertTrue(result instanceof CourseDto);
+
+
     }
 
-    @Test
-    void getCourseByName_StudentRoleUnpaid_ReturnsUnpaidDto() {
-        mockUser.setRole(Role.STUDENT);
-        when(courseDAO.findCourseBycourseName(anyString())).thenReturn(Optional.of(testCourse));
-        when(enrollementDAO.isEnrollmentPaid(anyLong(), anyLong())).thenReturn(false);
-        when(courseMapper.returns_UnpaidCourseDto(testCourse)).thenReturn(unpaidCourseDto);
 
-        Object result = courseService.getCourseByName("Java", authentication);
+
+
+        /*
+           Next tests to add + continue Caching tests for evict and put :
+
+
+   @Test
+    void getCourseByName_StudentRoleUnpaid_ReturnsUnpaidDto() {
+
+        enrollement.setPayment_Status(PaymentStatus.UnPaid);
+        Object result = courseCacheService.getCachedCourse(student, testCourse.getCourseName());
+
 
         assertTrue(result instanceof UnpaidCourseDto);
     }
 
 
-@Test
-    void getCourseByName_FormateurRoleUnauthorized_ThrowsException() {
-        mockUser.setRole(Role.FORMATEUR);
-        when(courseDAO.findCourseBycourseName(anyString())).thenReturn(Optional.of(testCourse));
-        when(formationDAO.findFormationByNameForFormateur(anyString(), anyLong()))
-                .thenReturn(Optional.empty());
 
-        assertThrows(AccessDeniedException.class,
-                () -> courseService.getCourseByName("Java", authentication));
-    }
+
+
+
+   // getCourseByName tests
+
+
+
+
 
 
 

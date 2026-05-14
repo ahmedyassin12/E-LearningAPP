@@ -121,8 +121,8 @@ public class CourseCacheService {
                 if (isPaid) {
                     return courseMapper.returnCourseDto(course);
                 } else {
-                    UnpaidCourseDto courseDto = courseMapper.returns_UnpaidCourseDto(course);
-                    return courseDto;
+                    UnpaidCourseDto unpaidCourseDto = courseMapper.returns_UnpaidCourseDto(course);
+                    return unpaidCourseDto;
 
                 }
 
